@@ -1,0 +1,32 @@
+shader main {
+    input vec2 texCoord;
+    output vec4 fragColor;
+
+    uniform sampler2D texture;
+
+    void main() {
+        vec2 texOffset = vec2(1.0 / 512.0); // Offset for sampling neighboring pixels
+        vec3 sample[9];
+
+        // Sample the 3x3 neighborhood around the current pixel
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                sample[(i+1) * 3 + (j+1)] = texture(texture, texCoord + vec2(i, j) * texOffset).rgb;
+            }
+        }
+
+        vec3 color = vec3(0.0);
+        // Apply the edge detection kernel
+        color += sample[0] * -1.0; // Top-left
+        color += sample[1] * -1.0; // Top-center
+        color += sample[2] * -1.0; // Top-right
+        color += sample[3] * -1.0; // Center-left
+        color += sample[5] * 1.0;  // Center-right
+        color += sample[6] * 1.0;  // Bottom-left
+        color += sample[7] * 1.0;  // Bottom-center
+        color += sample[8] * 1.0;  // Bottom-right
+
+        // Add bias to the color to ensure it's visible
+        fragColor = vec4(color + vec3(0.5), 1.0);
+    }
+}

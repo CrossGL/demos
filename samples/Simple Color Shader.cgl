@@ -1,0 +1,19 @@
+shader main {
+    vertex {
+        input vec3 position;
+        output vec4 color;
+
+        void main() {
+            color = vec4(position, 1.0);
+        }
+    }
+
+    fragment {
+        input vec4 color;
+        output vec4 fragColor;
+
+        void main() {
+            fragColor = color;
+        }
+    }
+}

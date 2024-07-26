@@ -1,0 +1,12 @@
+shader main {
+    input vec2 texCoord;
+    output vec4 fragColor;
+
+    uniform vec3 topColor;
+    uniform vec3 bottomColor;
+
+    void main() {
+        vec3 color = mix(bottomColor, topColor, texCoord.y);
+        fragColor = vec4(color, 1.0);
+    }
+}

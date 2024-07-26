@@ -1,0 +1,51 @@
+shader complexShader {
+    vertex {
+        input vec3 position;
+        input vec2 texCoord;
+        output vec4 color;
+
+        uniform mat4 modelMatrix;
+        uniform float time;
+        
+        vec3 calculateLighting(vec3 normal, vec3 lightDir, vec3 viewDir) {
+            float ambientStrength = 0.1;
+            vec3 ambient = ambientStrength * vec3(1.0, 1.0, 1.0); // Light color can be passed here if needed
+
+            float diff = max(dot(normal, lightDir), 0.0);
+            vec3 diffuse = diff * vec3(1.0, 1.0, 1.0); // Light color can be passed here if needed
+
+            float specularStrength = 0.5;
+            vec3 reflectDir = reflect(-lightDir, normal);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+            vec3 specular = specularStrength * spec * vec3(1.0, 1.0, 1.0); // Light color can be passed here if needed
+
+            return ambient + diffuse + specular;
+        }
+
+        void main() {
+            // Pass texture coordinates to the fragment shader
+            color.xy = texCoord;
+
+            // Calculate normal in the vertex shader
+            vec3 normal = normalize(cross(dFdx(position), dFdy(position)));
+            vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
+            vec3 viewDir = normalize(-position);
+
+            vec3 lighting = calculateLighting(normal, lightDir, viewDir);
+            color.rgb = lighting;
+            color.a = 1.0; // Alpha channel
+        }
+    }
+
+    fragment {
+        input vec4 color;
+        output vec4 fragColor;
+
+        uniform sampler2D textureSampler;
+
+        void main() {
+            vec4 texColor = texture(textureSampler, color.xy);
+            fragColor = vec4(color.rgb * texColor.rgb, 1.0);
+        }
+    }
+}

@@ -1,0 +1,82 @@
+shader complexShader {
+    vertex {
+        input vec3 position;
+        input vec2 texCoord;
+        input vec3 normal;
+        output vec4 color;
+
+        uniform sampler2D normalMap;
+        uniform vec3 lightPos;
+        uniform vec3 viewPos;
+
+        vec3 applyNormalMapping(vec3 normal, vec3 mapNormal) {
+            return normalize(normal * mapNormal);
+        }
+
+        void main() {
+            // Pass texture coordinates and normals to the fragment shader
+            color.xy = texCoord;
+            color.zw = normal;
+
+            // Calculate normal map in the vertex shader
+            vec4 normalMapColor = texture(normalMap, texCoord);
+            vec3 mapNormal = normalize(normalMapColor.rgb * 2.0 - 1.0);
+            vec3 perturbedNormal = applyNormalMapping(normal, mapNormal);
+
+            // Pass perturbed normal to the fragment shader
+            color.rgb = vec3(perturbedNormal);
+            color.a = 1.0; // Alpha channel
+        }
+    }
+
+    fragment {
+        input vec4 color;
+        input vec2 texCoord;
+        output vec4 fragColor;
+
+        uniform sampler2D diffuseTexture;
+        uniform sampler2D specularTexture;
+        uniform vec3 lightPos;
+        uniform vec3 viewPos;
+        uniform vec3 ambientColor;
+        uniform float shininess;
+        uniform float specularIntensity;
+        uniform int iterations;
+
+        vec3 calculateSpecular(vec3 normal, vec3 lightDir, vec3 viewDir) {
+            vec3 reflectDir = reflect(-lightDir, normal);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+            return spec * vec3(1.0, 1.0, 1.0) * specularIntensity;
+        }
+
+        void main() {
+            vec4 diffuseColor = texture(diffuseTexture, texCoord);
+            vec4 specularColor = texture(specularTexture, texCoord);
+
+            vec3 perturbedNormal = normalize(color.rgb);
+            vec3 lightDir = normalize(lightPos - position);
+            vec3 viewDir = normalize(viewPos - position);
+
+            // Ambient component
+            vec3 ambient = ambientColor;
+
+            // Diffuse component
+            float diff = max(dot(perturbedNormal, lightDir), 0.0);
+            vec3 diffuse = diff * diffuseColor.rgb;
+
+            // Specular component
+            vec3 specular = calculateSpecular(perturbedNormal, lightDir, viewDir);
+
+            // Loop to modify lighting based on iterations
+            vec3 lighting = ambient + diffuse + specular;
+            for (int i = 0; i < iterations; i++) {
+                lighting *= 0.9;
+            }
+
+            // Ternary operator to conditionally modify color
+            vec4 color = (diff > 0.5) ? vec4(lighting, 1.0) * diffuseColor : vec4(lighting * 0.5, 1.0) * diffuseColor;
+
+            fragColor = color;
+        }
+    }
+}

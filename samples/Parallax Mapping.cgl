@@ -1,0 +1,26 @@
+shader main {
+    vertex {
+        input vec2 texCoord;
+        output vec2 texCoordOut;
+
+        void main() {
+            texCoordOut = texCoord;
+        }
+    }
+
+    fragment {
+        input vec2 texCoordOut;
+        output vec4 fragColor;
+
+        uniform sampler2D texture;
+        uniform sampler2D heightMap;
+        uniform vec2 viewDir;
+
+        void main() {
+            float height = texture(heightMap, texCoordOut).r;
+            vec2 offset = height * viewDir;
+            vec4 color = texture(texture, texCoordOut + offset);
+            fragColor = vec4(color.rgb, 1.0);
+        }
+    }
+}

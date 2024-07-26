@@ -1,0 +1,15 @@
+shader main {
+    input vec2 texCoord;
+    output vec4 fragColor;
+
+    uniform sampler2D texture;
+    uniform float radius;
+    uniform float softness;
+
+    void main() {
+        vec4 color = texture(texture, texCoord);
+        float dist = distance(texCoord, vec2(0.5));
+        float vignette = smoothstep(radius, radius - softness, dist);
+        fragColor = vec4(color.rgb * vignette, 1.0);
+    }
+}

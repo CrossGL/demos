@@ -1,0 +1,25 @@
+shader main {
+    vertex {
+        input vec3 position;
+        output vec4 color;
+
+        float fluidMotion(vec3 p) {
+            return sin(p.x * 10.0 + iTime) * 0.5 + 0.5;
+        }
+
+        void main() {
+            float motion = fluidMotion(position);
+            vec3 colorComputed = vec3(0.0, 0.0, 1.0) * motion;
+            color = vec4(colorComputed, 1.0);
+        }
+    }
+
+    fragment {
+        input vec4 color;
+        output vec4 fragColor;
+
+        void main() {
+            fragColor = color;
+        }
+    }
+}

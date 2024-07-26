@@ -1,0 +1,30 @@
+shader main {
+    vertex {
+        input vec2 texCoord;
+        output vec4 color;
+
+        // Pass through the texture coordinate
+        void main() {
+            color = vec4(texCoord, 0.0, 1.0);
+        }
+    }
+
+    fragment {
+        input vec4 color; // This contains the texture coordinate
+        output vec4 fragColor;
+
+        uniform sampler2D texture;
+        uniform vec2 motionDirection;
+        uniform float blurAmount;
+
+        void main() {
+            vec2 texCoord = color.xy; // Extract the texture coordinate
+            vec4 colorAccum = vec4(0.0);
+            for (int i = -4; i <= 4; i++) {
+                colorAccum += texture(texture, texCoord + float(i) * motionDirection * blurAmount / 10.0);
+            }
+            colorAccum /= 9.0;
+            fragColor = colorAccum;
+        }
+    }
+}

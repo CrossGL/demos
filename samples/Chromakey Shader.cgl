@@ -1,0 +1,18 @@
+shader main {
+    input vec2 texCoord;
+    output vec4 fragColor;
+
+    uniform sampler2D texture;
+    uniform vec3 keyColor;
+    uniform float threshold;
+
+    void main() {
+        vec4 color = texture(texture, texCoord);
+        float diff = length(color.rgb - keyColor);
+        if (diff < threshold) {
+            discard;
+        } else {
+            fragColor = color;
+        }
+    }
+}

@@ -1,0 +1,16 @@
+shader main {
+    input vec2 texCoord;
+    output vec4 fragColor;
+
+    uniform sampler2D texture;
+    uniform vec2 lightPos;
+
+    void main() {
+        vec2 uv = texCoord;
+        vec4 color = texture(texture, uv);
+        vec2 dir = uv - lightPos;
+        float dist = length(dir);
+        vec4 shaftColor = texture(texture, uv - dir * (1.0 - dist));
+        fragColor = mix(color, shaftColor, 0.5);
+    }
+}

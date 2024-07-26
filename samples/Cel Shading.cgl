@@ -1,0 +1,35 @@
+shader main {
+    vertex {
+        input vec3 position;
+        input vec3 normal;
+        output vec4 color;
+
+        uniform vec3 lightPos;
+
+        vec3 celShading(vec3 normal, vec3 lightDir) {
+            float intensity = dot(normal, lightDir);
+            if (intensity > 0.95) return vec3(1.0, 1.0, 1.0);
+            else if (intensity > 0.5) return vec3(0.8, 0.8, 0.8);
+            else if (intensity > 0.25) return vec3(0.6, 0.6, 0.6);
+            else return vec3(0.4, 0.4, 0.4);
+        }
+
+        void main() {
+            vec3 norm = normalize(normal);
+            vec3 lightDir = normalize(lightPos - position);
+            vec3 color = celShading(norm, lightDir);
+
+            color.rgb = color;
+            color.a = 1.0; // Alpha channel
+        }
+    }
+
+    fragment {
+        input vec4 color;
+        output vec4 fragColor;
+
+        void main() {
+            fragColor = color;
+        }
+    }
+}

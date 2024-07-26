@@ -1,0 +1,16 @@
+shader main {
+    input vec2 texCoord;
+    output vec4 fragColor;
+
+    uniform sampler2D texture;
+    uniform float time;
+
+    void main() {
+        vec2 uv = texCoord;
+        if (fract(time * 10.0) < 0.5) {
+            uv.x += sin(texCoord.y * 10.0) * 0.1;
+        }
+        vec4 color = texture(texture, uv);
+        fragColor = color;
+    }
+}

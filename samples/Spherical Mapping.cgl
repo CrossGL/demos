@@ -1,0 +1,15 @@
+shader main {
+    input vec3 position;
+    output vec4 fragColor;
+
+    uniform sampler2D texture;
+
+    void main() {
+        vec3 norm = normalize(position);
+        float u = 0.5 + atan(norm.z, norm.x) / (2.0 * 3.14159265);
+        float v = 0.5 - asin(norm.y) / 3.14159265;
+        vec2 uv = vec2(u, v);
+        vec4 color = texture(texture, uv);
+        fragColor = vec4(color.rgb, 1.0);
+    }
+}
