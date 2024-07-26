@@ -1,0 +1,37 @@
+shader complexShader {
+    vertex {
+        input vec3 position;
+        input vec2 texCoord;
+        output vec4 color;
+
+        float calculateLighting(vec3 normal, vec3 lightDir) {
+            float diff = max(dot(normal, lightDir), 0.0);
+            return diff;
+        }
+
+        vec4 textureColor(vec2 coord) {
+            return texture2D(textureSampler, coord);
+        }
+
+        void main() {
+            vec3 normal = normalize(vec3(0.0, 0.0, 1.0));
+            vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
+            float lightIntensity = calculateLighting(normal, lightDir);
+
+            vec4 texColor = textureColor(texCoord);
+            color = texColor * lightIntensity; // Apply lighting to color
+
+            // Pass texture coordinates to fragment shader
+            color.xy = texCoord;
+        }
+    }
+
+    fragment {
+        input vec4 color;
+        output vec4 fragColor;
+
+        void main() {
+            fragColor = color;
+        }
+    }
+}

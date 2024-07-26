@@ -1,0 +1,32 @@
+shader main {
+    vertex {
+        input vec3 position;
+        input vec3 normal;
+        output vec4 color;
+
+        // Pass the position and normal to the fragment shader
+        void main() {
+            color = vec4(position, 1.0); // Position
+            color = vec4(normal, 1.0);   // Normal
+        }
+    }
+
+    fragment {
+        input vec4 color; // This contains the position and normal
+        output vec4 fragColor;
+
+        uniform vec3 lightPos;
+        uniform vec3 colorLevels;
+
+        void main() {
+            vec3 position = color.xyz; // Extract the position
+            vec3 normal = color.wyz;   // Extract the normal (assuming w holds a component of normal)
+
+            vec3 norm = normalize(normal);
+            vec3 lightDir = normalize(lightPos - position);
+            float intensity = dot(norm, lightDir);
+            vec3 color = vec3(step(colorLevels, intensity));
+            fragColor = vec4(color, 1.0);
+        }
+    }
+}

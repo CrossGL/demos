@@ -1,0 +1,31 @@
+shader main {
+    input vec3 position;
+    input vec3 normal;
+    input vec2 texCoord;
+    output vec4 fragColor;
+
+    uniform sampler2D texture;
+    uniform sampler2D normalMap;
+    uniform vec3 lightPos;
+    uniform vec3 viewPos;
+
+    void main() {
+        // Fetch and normalize the normal from the normal map
+        vec3 norm = normalize(texture(normalMap, texCoord).rgb * 2.0 - 1.0);
+        
+        // Compute the light direction and the diffuse component
+        vec3 lightDir = normalize(lightPos - position);
+        float diff = max(dot(norm, lightDir), 0.0);
+        
+        // Compute the reflection direction and specular component
+        vec3 reflectDir = reflect(-lightDir, norm);
+        vec3 viewDir = normalize(viewPos - position);
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+        
+        // Fetch the texture color
+        vec3 color = texture(texture, texCoord).rgb;
+        
+        // Compute the final color with ambient, diffuse, and specular components
+        fragColor = vec4((0.1 + diff + spec) * color, 1.0);
+    }
+}

@@ -1,0 +1,18 @@
+shader main {
+    input vec2 texCoord;
+    output vec4 fragColor;
+
+    uniform sampler2D texture;
+    uniform vec2 center;
+    uniform float blurAmount;
+
+    void main() {
+        vec2 dir = texCoord - center;
+        vec4 color = vec4(0.0);
+        for (int i = -4; i <= 4; i++) {
+            color += texture(texture, texCoord + float(i) * dir * blurAmount / 10.0);
+        }
+        color /= 9.0;
+        fragColor = color;
+    }
+}

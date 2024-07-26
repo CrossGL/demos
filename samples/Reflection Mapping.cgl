@@ -1,0 +1,23 @@
+shader main {
+    input vec3 position;
+    input vec3 normal;
+    input vec2 texCoord;
+    output vec4 fragColor;
+
+    uniform sampler2D texture;
+    uniform samplerCube environmentMap;
+
+    void main() {
+        // Calculate the reflection direction based on the normal and view direction
+        vec3 reflectDir = reflect(normalize(position), normalize(normal));
+        
+        // Sample the environment map using the reflection direction
+        vec3 environmentColor = texture(environmentMap, reflectDir).rgb;
+        
+        // Sample the base texture color
+        vec3 objectColor = texture(texture, texCoord).rgb;
+        
+        // Mix the environment color and the object color
+        fragColor = vec4(mix(objectColor, environmentColor, 0.5), 1.0);
+    }
+}
