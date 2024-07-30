@@ -1,0 +1,30 @@
+shader main {
+    input vec3 position;
+    input vec3 normal;
+    input vec2 texCoord;
+    output vec4 fragColor;
+
+    uniform sampler2D texture;
+    uniform sampler2D shadowMap;
+    uniform mat4 lightSpaceMatrix;
+
+    void main() {
+        // Transform the fragment position into light space coordinates
+        vec4 lightSpacePos = lightSpaceMatrix * vec4(position, 1.0);
+        
+        // Perform perspective divide to get normalized device coordinates
+        vec3 projCoords = lightSpacePos.xyz / lightSpacePos.w;
+        
+        // Transform from [-1,1] range to [0,1] range
+        projCoords = projCoords * 0.5 + 0.5;
+
+        // Check if the fragment is in shadow
+        float shadow = texture(shadowMap, projCoords.xy).r < projCoords.z ? 0.5 : 1.0;
+
+        // Sample the color from the texture and apply the shadow factor
+        vec3 color = texture(texture, texCoord).rgb * shadow;
+        
+        // Output the final color with full opacity
+        fragColor = vec4(color, 1.0);
+    }
+}

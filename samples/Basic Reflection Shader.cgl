@@ -1,0 +1,32 @@
+shader main {
+    vertex {
+        input vec3 position;
+        input vec3 normal;
+        output vec3 fragPosition;
+        output vec3 fragNormal;
+
+        void main() {
+            fragPosition = position;
+            fragNormal = normal;
+            gl_Position = vec4(position, 1.0);
+        }
+    }
+
+    fragment {
+        input vec3 fragPosition;
+        input vec3 fragNormal;
+        uniform sampler2D texture;
+        uniform samplerCube environmentMap;
+        uniform vec3 viewPos;
+        output vec4 fragColor;
+
+        void main() {
+            vec3 norm = normalize(fragNormal);
+            vec3 viewDir = normalize(viewPos - fragPosition);
+            vec3 reflectDir = reflect(-viewDir, norm);
+            vec3 environmentColor = texture(environmentMap, reflectDir).rgb;
+            vec3 objectColor = texture(texture, fragPosition.xy).rgb;
+            fragColor = vec4(mix(objectColor, environmentColor, 0.5), 1.0);
+        }
+    }
+}

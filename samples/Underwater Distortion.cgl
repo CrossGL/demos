@@ -1,0 +1,18 @@
+shader main {
+    input vec2 texCoord;
+    output vec4 fragColor;
+
+    uniform sampler2D texture;
+    uniform float time;
+
+    void main() {
+        // Compute the UV coordinates with a time-based offset
+        vec2 uv = texCoord + vec2(sin(texCoord.y * 10.0 + time) * 0.01, cos(texCoord.x * 10.0 + time) * 0.01);
+        
+        // Sample the texture at the modified UV coordinates
+        vec4 color = texture(texture, uv);
+        
+        // Set the fragment color
+        fragColor = vec4(color.rgb, 1.0);
+    }
+}

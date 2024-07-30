@@ -1,0 +1,22 @@
+shader main {
+    input vec2 texCoord;
+    output vec4 fragColor;
+
+    uniform sampler2D texture;
+    uniform float outlineWidth;
+
+    void main() {
+        vec4 color = texture(texture, texCoord);
+        vec4 north = texture(texture, texCoord + vec2(0.0, outlineWidth));
+        vec4 south = texture(texture, texCoord - vec2(0.0, outlineWidth));
+        vec4 east = texture(texture, texCoord + vec2(outlineWidth, 0.0));
+        vec4 west = texture(texture, texCoord - vec2(outlineWidth, 0.0));
+
+        float edge = length((north + south + east + west) / 4.0 - color);
+        if (edge > 0.1) {
+            fragColor = vec4(0.0, 0.0, 0.0, 1.0);
+        } else {
+            fragColor = color;
+        }
+    }
+}

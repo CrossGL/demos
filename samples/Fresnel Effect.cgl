@@ -1,0 +1,39 @@
+shader main {
+    vertex {
+        input vec3 position;
+        input vec3 normal;
+        output vec4 color;
+
+        uniform vec3 viewDir;
+
+        float fresnelEffect(vec3 normal, vec3 viewDir) {
+            return pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0);
+        }
+
+        void main() {
+            // Pass the normalized normal and view direction to the fragment shader
+            color.rgb = normal;
+            color.a = 1.0; // Alpha channel
+        }
+    }
+
+    fragment {
+        input vec4 color;
+        input vec3 viewDir;
+        output vec4 fragColor;
+
+        uniform vec3 viewDir;
+
+        float fresnelEffect(vec3 normal, vec3 viewDir) {
+            return pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0);
+        }
+
+        void main() {
+            vec3 norm = normalize(color.rgb);
+            float fresnel = fresnelEffect(norm, normalize(viewDir));
+            vec3 color = vec3(0.1, 0.5, 1.0) * fresnel;
+
+            fragColor = vec4(color, 1.0);
+        }
+    }
+}

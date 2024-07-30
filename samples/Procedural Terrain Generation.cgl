@@ -1,0 +1,31 @@
+shader main {
+    vertex {
+        input vec2 position;
+        output vec4 color;
+
+        float noise(vec2 p) {
+            return sin(p.x * 10.0) * cos(p.y * 10.0);
+        }
+
+        float heightMap(vec2 p) {
+            float n = noise(p * 10.0);
+            return p.y + n * 0.1;
+        }
+
+        void main() {
+            vec2 uv = position;
+            float height = heightMap(uv);
+            vec3 colorComputed = vec3(0.5, 0.5, 0.5) * (1.0 - height * 0.5);
+            color = vec4(colorComputed, 1.0);
+        }
+    }
+
+    fragment {
+        input vec4 color;
+        output vec4 fragColor;
+
+        void main() {
+            fragColor = color;
+        }
+    }
+}

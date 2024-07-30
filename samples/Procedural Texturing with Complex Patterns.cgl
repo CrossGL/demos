@@ -1,0 +1,24 @@
+shader main {
+    vertex {
+        input vec2 texCoord;
+        output vec4 color;
+
+        float marblePattern(vec2 uv) {
+            return 0.5 + 0.5 * sin(10.0 * uv.x + iTime);
+        }
+
+        void main() {
+            vec3 colorComputed = vec3(marblePattern(texCoord), 0.0, 0.0);
+            color = vec4(colorComputed, 1.0);
+        }
+    }
+
+    fragment {
+        input vec4 color;
+        output vec4 fragColor;
+
+        void main() {
+            fragColor = color;
+        }
+    }
+}

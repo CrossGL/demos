@@ -1,0 +1,54 @@
+shader advancedShader {
+    vertex {
+        input vec3 position;
+        input vec2 texCoord;
+        output vec4 color;
+
+        uniform vec3 ambientColor;
+        uniform vec3 lightPos;
+        uniform vec3 viewPos;
+        uniform float shininess;
+
+        vec3 calculateSpecular(vec3 normal, vec3 lightDir, vec3 viewDir) {
+            vec3 reflectDir = reflect(-lightDir, normal);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+            return spec * vec3(1.0, 1.0, 1.0);  // White specular highlight
+        }
+
+        void main() {
+            // Pass texture coordinates to the fragment shader
+            color.xy = texCoord;
+
+            // Calculate normal in the vertex shader
+            vec3 norm = normalize(cross(dFdx(position), dFdy(position)));
+            vec3 lightDir = normalize(lightPos - position);
+            vec3 viewDir = normalize(viewPos - position);
+
+            // Ambient component
+            vec3 ambient = ambientColor;
+
+            // Diffuse component
+            float diff = max(dot(norm, lightDir), 0.0);
+            vec3 diffuse = diff * vec3(1.0, 1.0, 1.0);  // White diffuse light
+
+            // Specular component
+            vec3 specular = calculateSpecular(norm, lightDir, viewDir);
+
+            vec3 lighting = ambient + diffuse + specular;
+            color.rgb = lighting;
+            color.a = 1.0; // Alpha channel
+        }
+    }
+
+    fragment {
+        input vec4 color;
+        output vec4 fragColor;
+
+        uniform sampler2D textureSampler;
+
+        void main() {
+            vec4 texColor = texture(textureSampler, color.xy);
+            fragColor = vec4(color.rgb * texColor.rgb, 1.0);
+        }
+    }
+}

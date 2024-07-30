@@ -1,0 +1,22 @@
+shader main {
+    vertex {
+        input vec3 position;
+        input vec2 texCoord;
+        output vec2 fragTexCoord;
+
+        void main() {
+            fragTexCoord = texCoord;
+            gl_Position = vec4(position, 1.0);
+        }
+    }
+
+    fragment {
+        input vec2 fragTexCoord;
+        uniform sampler2D texture;
+        output vec4 fragColor;
+
+        void main() {
+            fragColor = texture(texture, fragTexCoord);
+        }
+    }
+}

@@ -1,0 +1,15 @@
+shader main {
+    input vec2 texCoord;
+    output vec4 fragColor;
+
+    uniform sampler2D texture;
+    uniform sampler2D displacementMap;
+    uniform float displacementFactor;
+
+    void main() {
+        vec2 displacement = texture(displacementMap, texCoord).rg * 2.0 - 1.0;
+        vec2 uv = texCoord + displacement * displacementFactor;
+        vec4 color = texture(texture, uv);
+        fragColor = vec4(color.rgb, 1.0);
+    }
+}

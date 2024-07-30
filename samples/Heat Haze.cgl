@@ -1,0 +1,24 @@
+shader main {
+    vertex {
+        input vec2 texCoord;
+        output vec2 texCoordOut;
+
+        void main() {
+            texCoordOut = texCoord;
+        }
+    }
+
+    fragment {
+        input vec2 texCoordOut;
+        output vec4 fragColor;
+
+        uniform sampler2D texture;
+        uniform float time;
+
+        void main() {
+            vec2 uv = texCoordOut + sin(texCoordOut.y * 10.0 + time) * 0.01;
+            vec4 color = texture(texture, uv);
+            fragColor = vec4(color.rgb, 1.0);
+        }
+    }
+}

@@ -1,0 +1,19 @@
+shader main {
+    input vec3 position;
+    input vec3 normal;
+    input vec2 texCoord;
+    output vec4 fragColor;
+
+    uniform sampler2D texture;
+    uniform float fogDensity;
+    uniform vec3 fogColor;
+
+    void main() {
+        vec3 baseColor = texture(texture, texCoord).rgb;
+        float depth = length(position);
+        float fogFactor = exp(-fogDensity * depth);
+        vec3 finalColor = mix(fogColor, baseColor, fogFactor);
+
+        fragColor = vec4(finalColor, 1.0);
+    }
+}

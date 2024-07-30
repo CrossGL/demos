@@ -1,0 +1,25 @@
+shader main {
+    vertex {
+        input vec3 position;
+        output vec4 color;
+
+        vec3 dayNightColor(float timeOfDay) {
+            return mix(vec3(0.0, 0.5, 1.0), vec3(0.0, 0.0, 0.2), timeOfDay);
+        }
+
+        void main() {
+            float timeOfDay = mod(iTime / 24.0, 1.0);
+            vec3 colorComputed = dayNightColor(timeOfDay);
+            color = vec4(colorComputed, 1.0);
+        }
+    }
+
+    fragment {
+        input vec4 color;
+        output vec4 fragColor;
+
+        void main() {
+            fragColor = color;
+        }
+    }
+}

@@ -1,0 +1,16 @@
+shader main {
+    input vec3 position;
+    input vec3 normal;
+    output vec4 fragColor;
+
+    uniform vec3 viewPos;
+    uniform vec3 rimColor;
+    uniform float rimPower;
+
+    void main() {
+        vec3 viewDir = normalize(viewPos - position);
+        float rim = pow(1.0 - max(dot(normal, viewDir), 0.0), rimPower);
+        vec3 color = vec3(0.5, 0.5, 0.5) + rim * rimColor;
+        fragColor = vec4(color, 1.0);
+    }
+}

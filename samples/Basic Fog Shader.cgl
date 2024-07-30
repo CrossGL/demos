@@ -1,0 +1,31 @@
+shader main {
+    vertex {
+        input vec3 position;
+        input vec2 texCoord;
+        output vec2 fragTexCoord;
+        output vec3 fragPosition;
+
+        void main() {
+            fragTexCoord = texCoord;
+            fragPosition = position;
+            gl_Position = vec4(position, 1.0);
+        }
+    }
+
+    fragment {
+        input vec2 fragTexCoord;
+        input vec3 fragPosition;
+        uniform sampler2D texture;
+        uniform vec3 fogColor;
+        uniform float fogDensity;
+        output vec4 fragColor;
+
+        void main() {
+            vec3 baseColor = texture(texture, fragTexCoord).rgb;
+            float depth = length(fragPosition);
+            float fogFactor = exp(-fogDensity * depth);
+            vec3 finalColor = mix(fogColor, baseColor, fogFactor);
+            fragColor = vec4(finalColor, 1.0);
+        }
+    }
+}
