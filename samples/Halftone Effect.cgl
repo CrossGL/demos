@@ -1,28 +1,24 @@
 shader main {
+vertex {
     input vec2 texCoord;
-    output vec4 fragColor;
-
-    uniform sampler2D texture;
-    uniform float dotSize;
+    output vec2 fragTexCoord;
 
     void main() {
-        // Scale texture coordinates by dotSize
-        vec2 uv = texCoord * dotSize;
-
-        // Calculate angle and radius for the dot pattern
-        float angle = mod(uv.x + uv.y, 2.0) * 3.14159265;
-        float radius = length(fract(uv) - vec2(0.5));
-
-        // Sample color from texture
-        vec4 color = texture(texture, texCoord);
-
-        // Calculate intensity based on luminance
-        float intensity = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-
-        // Compute dot pattern using smoothstep for edge softness
-        float dot = smoothstep(0.4, 0.5, sin(angle) * 0.5 + radius);
-
-        // Set fragment color with dot pattern applied
-        fragColor = vec4(vec3(dot * intensity), 1.0);
+        fragTexCoord = texCoord;
     }
+}
+
+fragment {
+    input vec2 fragTexCoord;
+    output vec4 fragColor;
+
+    void main() {
+        float angle = mod(uv + uv, 2.0) * 3.14159265;
+        float radius = length(fract(uv) - vec2(0.5));
+        vec4 color = texture(texture, fragTexCoord);
+        float itensity = dot(color, vec3(0.299, 0.587, 0.114));
+        float dot = smoothstep(0.4, 0.5, sin(angle) * 0.5 + radius);
+        fragColor = vec4(vec3(dot * itensity), 1.0);
+    }
+}
 }

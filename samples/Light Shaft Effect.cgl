@@ -1,16 +1,27 @@
 shader main {
-    input vec2 texCoord;
+vertex {
+    input vec3 position;
+    input vec3 normal;
+    output vec3 fragPosition;
+    output vec3 fragNormal;
+
+    // Pass through position and normal to the fragment shader
+    void main() {
+        fragPosition = position;
+        fragNormal = normal;
+    }
+}
+
+fragment {
+    input vec3 fragPosition;
+    input vec3 fragNormal;
     output vec4 fragColor;
 
-    uniform sampler2D texture;
-    uniform vec2 lightPos;
-
     void main() {
-        vec2 uv = texCoord;
-        vec4 color = texture(texture, uv);
-        vec2 dir = uv - lightPos;
-        float dist = length(dir);
-        vec4 shaftColor = texture(texture, uv - dir * (1.0 - dist));
-        fragColor = mix(color, shaftColor, 0.5);
+        vec3 viewDir = normalize(viewPos - fragPosition);
+        float rim = pow(1.0 - max(dot(fragNormal, viewDir), 0.0), rimPower);
+        vec3 color = vec3(0.5, 0.5, 0.5) + rim * rimColor;
+        fragColor = vec4(color, 1.0);
     }
+}
 }

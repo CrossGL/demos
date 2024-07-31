@@ -1,22 +1,36 @@
 shader main {
+vertex {
     input vec2 texCoord;
-    output vec4 fragColor;
-
-    uniform sampler2D texture;
-    uniform float threshold1;
-    uniform float threshold2;
-    uniform float threshold3;
+    output vec2 fragTexCoord;
 
     void main() {
-        vec4 color = texture(texture, texCoord);
-        float intensity = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+        fragTexCoord = texCoord;
+    }
+}
+
+fragment {
+    input vec2 fragTexCoord;
+    output vec4 fragColor;
+
+    void main() {
+        vec4 color = texture(texture, fragTexCoord);
+        float itensity = dot(color, vec3(0.299, 0.587, 0.114));
 
         vec3 hatching = vec3(1.0);
-        if (intensity < threshold1) hatching = vec3(0.8);
-        else if (intensity < threshold2) hatching = vec3(0.6);
-        else if (intensity < threshold3) hatching = vec3(0.4);
-        else hatching = vec3(0.2);
+        if (itensity < threshold1) {
+                hatching = vec3(0.8);
+                }
+        if (itensity < threshold2) {
+        hatching = vec3(0.6);
+        }
+        if (itensity < threshold3) {
+        hatching = vec3(0.4);
+        }
+        else {
+        hatching = vec3(0.2);
+        }
 
         fragColor = vec4(hatching, 1.0);
     }
+}
 }

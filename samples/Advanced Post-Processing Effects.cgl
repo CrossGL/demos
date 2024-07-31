@@ -1,20 +1,17 @@
 shader main {
     vertex {
-        input vec2 texCoord;
-        output vec4 color;
-
-        // Pass through texture coordinates as color
-        color = vec4(texCoord, 0.0, 1.0);
+        // Vertex shader logic goes here.
     }
 
     fragment {
-        input vec4 color;
+        input vec2 texCoord;
         output vec4 fragColor;
 
-        float brightness = texture2D(iChannel0, color.xy).r;
-        float bloom = max(0.0, brightness - 0.5);
-        vec3 texColor = texture2D(iChannel0, color.xy).rgb;
-        vec3 colorWithBloom = texColor + vec3(bloom);
-        fragColor = vec4(colorWithBloom, 1.0);
+        void main() {
+            float brightness = 0.0; // Placeholder for brightness calculation
+            float bloom = max(0.0, brightness - 0.5);
+            vec3 color = vec3(0.0); // Placeholder for texture color
+            fragColor = vec4(color + vec3(bloom), 1.0);
+        }
     }
 }

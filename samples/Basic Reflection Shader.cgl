@@ -15,17 +15,13 @@ shader main {
     fragment {
         input vec3 fragPosition;
         input vec3 fragNormal;
-        uniform sampler2D texture;
-        uniform samplerCube environmentMap;
-        uniform vec3 viewPos;
         output vec4 fragColor;
 
         void main() {
             vec3 norm = normalize(fragNormal);
             vec3 viewDir = normalize(viewPos - fragPosition);
             vec3 reflectDir = reflect(-viewDir, norm);
-            vec3 environmentColor = texture(environmentMap, reflectDir).rgb;
-            vec3 objectColor = texture(texture, fragPosition.xy).rgb;
+
             fragColor = vec4(mix(objectColor, environmentColor, 0.5), 1.0);
         }
     }

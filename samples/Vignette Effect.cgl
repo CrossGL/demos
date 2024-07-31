@@ -1,15 +1,22 @@
 shader main {
+vertex {
     input vec2 texCoord;
-    output vec4 fragColor;
-
-    uniform sampler2D texture;
-    uniform float radius;
-    uniform float softness;
+    output vec2 fragTexCoord;
 
     void main() {
-        vec4 color = texture(texture, texCoord);
-        float dist = distance(texCoord, vec2(0.5));
-        float vignette = smoothstep(radius, radius - softness, dist);
-        fragColor = vec4(color.rgb * vignette, 1.0);
+        fragTexCoord = texCoord;
     }
+}
+
+fragment {
+    input vec2 fragTexCoord;
+    output vec4 fragColor;
+
+    void main() {
+        vec4 color = texture(texture, fragTexCoord);
+        float dist = distance(fragTexCoord, vec2(0.5));
+        float vignette = smoothstep(radius, radius - softness, dist);
+        fragColor = vec4(color * vignette, 1.0);
+    }
+}
 }

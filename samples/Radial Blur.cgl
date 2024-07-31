@@ -1,18 +1,25 @@
 shader main {
+vertex {
     input vec2 texCoord;
-    output vec4 fragColor;
-
-    uniform sampler2D texture;
-    uniform vec2 center;
-    uniform float blurAmount;
+    output vec2 fragTexCoord;
 
     void main() {
-        vec2 dir = texCoord - center;
+        fragTexCoord = texCoord;
+    }
+}
+
+fragment {
+    input vec2 fragTexCoord;
+    output vec4 fragColor;
+
+    void main() {
+        vec2 dir = fragTexCoord - center;
         vec4 color = vec4(0.0);
-        for (int i = -4; i <= 4; i++) {
-            color += texture(texture, texCoord + float(i) * dir * blurAmount / 10.0);
+        for (int i = -4; i < 4; i++) {
+            color += texture(texture, fragTexCoord  * dir * blurAmount);
         }
         color /= 9.0;
         fragColor = color;
     }
+}
 }

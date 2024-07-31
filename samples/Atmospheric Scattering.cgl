@@ -1,7 +1,11 @@
 shader main {
     vertex {
+        // Vertex shader logic goes here.
+    }
+
+    fragment {
         input vec3 position;
-        output vec4 color;
+        output vec4 fragColor;
 
         vec3 rayleighScattering(float theta) {
             return vec3(0.5, 0.7, 1.0) * pow(max(0.0, 1.0 - theta * theta), 3.0);
@@ -9,17 +13,8 @@ shader main {
 
         void main() {
             float theta = position.y;
-            vec3 colorComputed = rayleighScattering(theta);
-            color = vec4(colorComputed, 1.0);
-        }
-    }
-
-    fragment {
-        input vec4 color;
-        output vec4 fragColor;
-
-        void main() {
-            fragColor = color;
+            vec3 color = rayleighScattering(theta);
+            fragColor = vec4(color, 1.0);
         }
     }
 }

@@ -1,27 +1,28 @@
 shader main {
+vertex {
     input vec3 position;
     input vec3 normal;
     input vec2 texCoord;
-    output vec4 fragColor;
-
-    uniform sampler2D texture;
-    uniform sampler2D normalMap;
-    uniform vec3 lightPos;
+    output vec3 fragPosition;
+    output vec2 fragTexCoord;
 
     void main() {
-        // Fetch and normalize the normal from the normal map
-        vec3 norm = normalize(texture(normalMap, texCoord).rgb * 2.0 - 1.0);
-        
-        // Calculate the direction from the fragment to the light
-        vec3 lightDir = normalize(lightPos - position);
-        
-        // Compute the diffuse lighting term
+        fragPosition = position;
+        fragTexCoord = texCoord;
+    }
+}
+
+fragment {
+    input vec3 fragPosition;
+    input vec2 fragTexCoord;
+    output vec4 fragColor;
+
+    void main() {
+        vec3 norm = normalize(texture(normalMap, fragTexCoord) * 2.0 - 1.0);
+        vec3 lightDir = normalize(lightPos - fragPosition);
         float diff = max(dot(norm, lightDir), 0.0);
-        
-        // Fetch the color from the texture and apply the diffuse lighting
-        vec3 color = texture(texture, texCoord).rgb * diff;
-        
-        // Output the final color with full opacity
+        vec3 color = texture(texture, fragTexCoord) * diff;
         fragColor = vec4(color, 1.0);
     }
+}
 }

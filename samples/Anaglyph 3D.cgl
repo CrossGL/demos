@@ -1,13 +1,21 @@
 shader main {
+vertex {
     input vec2 texCoord;
-    output vec4 fragColor;
-
-    uniform sampler2D texture;
-    uniform vec2 eyeOffset;
+    output vec2 fragTexCoord;
 
     void main() {
-        vec4 leftColor = texture(texture, texCoord - eyeOffset);
-        vec4 rightColor = texture(texture, texCoord + eyeOffset);
-        fragColor = vec4(leftColor.r, rightColor.g, rightColor.b, 1.0);
+        fragTexCoord = texCoord;
     }
+}
+
+fragment {
+    input vec2 fragTexCoord;
+    output vec4 fragColor;
+
+    void main() {
+        vec4 leftColor = texture(texture, fragTexCoord - eyeOffset);
+        vec4 rightColor = texture(texture, fragTexCoord + eyeOffset);
+        fragColor = vec4(leftColor, rightColor, rightColor, 1.0);
+    }
+}
 }

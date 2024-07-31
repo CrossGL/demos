@@ -1,16 +1,25 @@
 shader main {
+vertex {
     input vec2 texCoord;
-    output vec4 fragColor;
-
-    uniform sampler2D texture;
+    output vec2 fragTexCoord;
 
     void main() {
-        vec4 color = texture(texture, texCoord);
+        fragTexCoord = texCoord;
+    }
+}
+
+fragment {
+    input vec2 fragTexCoord;
+    output vec4 fragColor;
+
+    void main() {
+        vec4 color = texture(texture, fragTexCoord);
         vec3 sepia = vec3(
-            dot(color.rgb, vec3(0.393, 0.769, 0.189)),
-            dot(color.rgb, vec3(0.349, 0.686, 0.168)),
-            dot(color.rgb, vec3(0.272, 0.534, 0.131))
+            dot(color, vec3(0.393, 0.769, 0.189)),
+            dot(color, vec3(0.349, 0.686, 0.168)),
+            dot(color, vec3(0.272, 0.534, 0.131))
         );
         fragColor = vec4(sepia, 1.0);
     }
+}
 }

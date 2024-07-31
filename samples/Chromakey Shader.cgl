@@ -1,18 +1,28 @@
 shader main {
+vertex {
     input vec2 texCoord;
-    output vec4 fragColor;
-
-    uniform sampler2D texture;
-    uniform vec3 keyColor;
-    uniform float threshold;
+    output vec2 fragTexCoord;
 
     void main() {
-        vec4 color = texture(texture, texCoord);
-        float diff = length(color.rgb - keyColor);
+        fragTexCoord = texCoord;
+    }
+}
+
+fragment {
+    input vec2 fragTexCoord;
+    output vec4 fragColor;
+
+    void main() {
+        vec4 color = texture(texture, fragTexCoord);
+        vec3 keyColor = vec3(1.0, 0.0, 0.0); // Example key color
+        float threshold = 0.1; // Example threshold
+
+        float diff = length(color - keyColor);
         if (diff < threshold) {
             discard;
         } else {
             fragColor = color;
         }
     }
+}
 }
