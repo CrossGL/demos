@@ -1,26 +1,21 @@
 shader main {
     vertex {
-        input vec3 position;
-        output vec4 color;
+        // Vertex shader logic goes here.
+    }
 
-        float subsurfaceScattering(vec3 pos) {
-            return exp(-length(pos) * 2.0);
+    fragment {
+        input vec3 position;
+        output vec4 fragColor;
+
+        float subsurfaceScattering(vec3 position) {
+            return exp(-length(position) * 2.0);
         }
 
         void main() {
             vec3 baseColor = vec3(1.0, 0.8, 0.6);
             float sss = subsurfaceScattering(position);
-            vec3 colorComputed = baseColor * sss;
-            color = vec4(colorComputed, 1.0);
-        }
-    }
-
-    fragment {
-        input vec4 color;
-        output vec4 fragColor;
-
-        void main() {
-            fragColor = color;
+            vec3 color = baseColor * sss;
+            fragColor = vec4(color, 1.0);
         }
     }
 }

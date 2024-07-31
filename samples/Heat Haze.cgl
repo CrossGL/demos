@@ -1,24 +1,22 @@
 shader main {
-    vertex {
-        input vec2 texCoord;
-        output vec2 texCoordOut;
+vertex {
+    input vec2 texCoord;
+    output vec2 fragTexCoord;
 
-        void main() {
-            texCoordOut = texCoord;
-        }
+    // Pass through texCoord to the fragment shader
+    void main() {
+        fragTexCoord = texCoord;
     }
+}
 
-    fragment {
-        input vec2 texCoordOut;
-        output vec4 fragColor;
+fragment {
+    input vec2 fragTexCoord;
+    output vec4 fragColor;
 
-        uniform sampler2D texture;
-        uniform float time;
-
-        void main() {
-            vec2 uv = texCoordOut + sin(texCoordOut.y * 10.0 + time) * 0.01;
-            vec4 color = texture(texture, uv);
-            fragColor = vec4(color.rgb, 1.0);
-        }
+    void main() {
+        vec2 uv = fragTexCoord + sin(fragTexCoord.y * 10.0 + time) * 0.01;
+        vec4 color = texture(texture, uv);
+        fragColor = vec4(color.rgb, 1.0);
     }
+}
 }

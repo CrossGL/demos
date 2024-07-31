@@ -1,23 +1,30 @@
 shader main {
+vertex {
     input vec3 position;
     input vec3 normal;
     input vec2 texCoord;
-    output vec4 fragColor;
-
-    uniform sampler2D texture;
-    uniform samplerCube environmentMap;
+    output vec3 fragPosition;
+    output vec3 fragNormal;
+    output vec2 fragTexCoord;
 
     void main() {
-        // Calculate the reflection direction based on the normal and view direction
-        vec3 reflectDir = reflect(normalize(position), normalize(normal));
-        
-        // Sample the environment map using the reflection direction
-        vec3 environmentColor = texture(environmentMap, reflectDir).rgb;
-        
-        // Sample the base texture color
-        vec3 objectColor = texture(texture, texCoord).rgb;
-        
-        // Mix the environment color and the object color
+        fragPosition = position;
+        fragNormal = normal;
+        fragTexCoord = texCoord;
+    }
+}
+
+fragment {
+    input vec3 fragPosition;
+    input vec3 fragNormal;
+    input vec2 fragTexCoord;
+    output vec4 fragColor;
+
+    void main() {
+        vec3 reflectDir = reflect(normalize(fragPosition), normalize(fragNormal));
+        vec3 environmentColor = texture(environmentMap, reflectDir);
+        vec3 objectColor = texture(texture, fragTexCoord);
         fragColor = vec4(mix(objectColor, environmentColor, 0.5), 1.0);
     }
+}
 }

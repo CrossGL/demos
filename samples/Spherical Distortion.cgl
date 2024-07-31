@@ -1,17 +1,27 @@
 shader main {
+vertex {
     input vec2 texCoord;
-    output vec4 fragColor;
-
-    uniform sampler2D texture;
-    uniform float strength;
+    output vec2 fragTexCoord;
 
     void main() {
-        vec2 uv = texCoord * 2.0 - 1.0; // Convert texCoord from [0, 1] to [-1, 1] range
-        float len = length(uv); // Compute the distance from the center
-        if (len < 1.0) {
-            uv = uv * (1.0 + strength * len * len); // Apply distortion based on distance
-        }
-        uv = uv * 0.5 + 0.5; // Convert back to [0, 1] range
-        fragColor = texture(texture, uv); // Sample the texture at the distorted coordinates
+        fragTexCoord = texCoord;
     }
+}
+
+fragment {
+    input vec2 fragTexCoord;
+    output vec4 fragColor;
+
+    void main() {
+        vec2 uv = fragTexCoord * 2.0 - 1.0;
+        float len = length(uv);
+        if (len < 1.0) {
+            uv = uv * (1.0 + strength * len * len);
+        }
+        uv = uv * 0.5 + 0.5;
+        fragColor = texture(texture, uv);
+    }
+}
+}
+}
 }

@@ -1,32 +1,29 @@
+26. Toon Shader
 shader main {
-    vertex {
-        input vec3 position;
-        input vec3 normal;
-        output vec4 color;
+vertex {
+    input vec3 position;
+    input vec3 normal;
+    output vec3 fragPosition;
+    output vec3 fragNormal;
 
-        // Pass the position and normal to the fragment shader
-        void main() {
-            color = vec4(position, 1.0); // Position
-            color = vec4(normal, 1.0);   // Normal
-        }
+    // Pass through position and normal to the fragment shader
+    void main() {
+        fragPosition = position;
+        fragNormal = normal;
     }
+}
 
-    fragment {
-        input vec4 color; // This contains the position and normal
-        output vec4 fragColor;
+fragment {
+    input vec3 fragPosition;
+    input vec3 fragNormal;
+    output vec4 fragColor;
 
-        uniform vec3 lightPos;
-        uniform vec3 colorLevels;
-
-        void main() {
-            vec3 position = color.xyz; // Extract the position
-            vec3 normal = color.wyz;   // Extract the normal (assuming w holds a component of normal)
-
-            vec3 norm = normalize(normal);
-            vec3 lightDir = normalize(lightPos - position);
-            float intensity = dot(norm, lightDir);
-            vec3 color = vec3(step(colorLevels, intensity));
-            fragColor = vec4(color, 1.0);
-        }
+    void main() {
+        vec3 norm = normalize(fragNormal);
+        vec3 lightDir = normalize(lightPos - fragPosition);
+        float itensity = dot(norm, lightDir);
+        vec3 color = vec3(step(colorLevels.x, itensity), step(colorLevels.y, itensity), step(colorLevels.z, itensity));
+        fragColor = vec4(color, 1.0);
     }
+}
 }

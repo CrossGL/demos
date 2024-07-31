@@ -1,16 +1,24 @@
 shader main {
+vertex {
     input vec2 texCoord;
+    output vec2 fragTexCoord;
+
+    // Pass through texCoord to the fragment shader
+    void main() {
+        fragTexCoord = texCoord;
+    }
+}
+
+fragment {
+    input vec2 fragTexCoord;
     output vec4 fragColor;
 
-    uniform sampler2D texture;
-    uniform float outlineWidth;
-
     void main() {
-        vec4 color = texture(texture, texCoord);
-        vec4 north = texture(texture, texCoord + vec2(0.0, outlineWidth));
-        vec4 south = texture(texture, texCoord - vec2(0.0, outlineWidth));
-        vec4 east = texture(texture, texCoord + vec2(outlineWidth, 0.0));
-        vec4 west = texture(texture, texCoord - vec2(outlineWidth, 0.0));
+        vec4 color = texture(texture, fragTexCoord);
+        vec4 north = texture(texture, fragTexCoord + vec2(0.0, outlineWidth));
+        vec4 south = texture(texture, fragTexCoord - vec2(0.0, outlineWidth));
+        vec4 east = texture(texture, fragTexCoord + vec2(outlineWidth, 0.0));
+        vec4 west = texture(texture, fragTexCoord - vec2(outlineWidth, 0.0));
 
         float edge = length((north + south + east + west) / 4.0 - color);
         if (edge > 0.1) {
@@ -19,4 +27,5 @@ shader main {
             fragColor = color;
         }
     }
+}
 }

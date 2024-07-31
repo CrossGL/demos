@@ -1,35 +1,23 @@
 shader main {
-    vertex {
-        input vec3 position;
-        input vec3 normal;
-        output vec4 color;
+vertex {
+    input vec3 position;
+    input vec3 normal;
+    output vec4 fragColor;
 
-        uniform vec3 lightPos;
+    // Vertex shader code, if needed
+    // For this example, there's no actual vertex shader code
+}
 
-        vec3 celShading(vec3 normal, vec3 lightDir) {
-            float intensity = dot(normal, lightDir);
-            if (intensity > 0.95) return vec3(1.0, 1.0, 1.0);
-            else if (intensity > 0.5) return vec3(0.8, 0.8, 0.8);
-            else if (intensity > 0.25) return vec3(0.6, 0.6, 0.6);
-            else return vec3(0.4, 0.4, 0.4);
-        }
-
-        void main() {
-            vec3 norm = normalize(normal);
-            vec3 lightDir = normalize(lightPos - position);
-            vec3 color = celShading(norm, lightDir);
-
-            color.rgb = color;
-            color.a = 1.0; // Alpha channel
-        }
-    }
-
-    fragment {
-        input vec4 color;
-        output vec4 fragColor;
+fragment {
+    input vec3 position;
+    input vec3 normal;
+    output vec4 fragColor;
 
         void main() {
-            fragColor = color;
-        }
+        vec3 norm = normalize(normal);
+        vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0) - position); // Example light position
+        
+        fragColor = vec4(color, 1.0);
     }
+}
 }

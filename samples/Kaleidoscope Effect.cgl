@@ -1,27 +1,24 @@
 shader main {
+vertex {
     input vec2 texCoord;
-    output vec4 fragColor;
-
-    uniform sampler2D texture;
-    uniform float segments;
+    output vec2 fragTexCoord;
 
     void main() {
-        // Compute the angle of the current texCoord relative to the center
-        float angle = atan(texCoord.y - 0.5, texCoord.x - 0.5);
-        
-        // Compute the radius from the center of the texture
-        float radius = length(texCoord - vec2(0.5));
-        
-        // Determine the segment index based on the angle and number of segments
+        fragTexCoord = texCoord;
+    }
+}
+
+fragment {
+    input vec2 fragTexCoord;
+    output vec4 fragColor;
+
+    void main() {
+        float angle = atan(fragTexCoord.y - 0.5, fragTexCoord.x - 0.5);
+        float radius = length(fragTexCoord - vec2(0.5));
         float segment = floor(segments * angle / (2.0 * 3.14159265));
-        
-        // Compute the new angle corresponding to the segment
         float newAngle = segment * 2.0 * 3.14159265 / segments;
-        
-        // Compute the new texture coordinates based on the new angle
         vec2 newTexCoord = vec2(0.5) + radius * vec2(cos(newAngle), sin(newAngle));
-        
-        // Sample the texture at the new texture coordinates
         fragColor = texture(texture, newTexCoord);
     }
+}
 }

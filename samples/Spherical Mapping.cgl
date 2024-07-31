@@ -1,15 +1,24 @@
 shader main {
+vertex {
     input vec3 position;
-    output vec4 fragColor;
-
-    uniform sampler2D texture;
+    output vec2 fragTexCoord;
 
     void main() {
+        // Transform position to texture coordinates
         vec3 norm = normalize(position);
         float u = 0.5 + atan(norm.z, norm.x) / (2.0 * 3.14159265);
         float v = 0.5 - asin(norm.y) / 3.14159265;
-        vec2 uv = vec2(u, v);
-        vec4 color = texture(texture, uv);
-        fragColor = vec4(color.rgb, 1.0);
+        fragTexCoord = vec2(u, v);
     }
+}
+
+fragment {
+    input vec2 fragTexCoord;
+    output vec4 fragColor;
+
+    void main() {
+        vec4 color = texture(texture, fragTexCoord);
+        fragColor = vec4(color, 1.0);
+    }
+}
 }

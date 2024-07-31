@@ -1,11 +1,21 @@
 shader main {
+vertex {
     input vec2 texCoord;
+    output vec2 fragTexCoord;
+
+    void main() {
+        fragTexCoord = texCoord * 10.0; // Scale texture coordinates
+    }
+}
+
+fragment {
+    input vec2 fragTexCoord;
     output vec4 fragColor;
 
     float hash(vec2 p) {
         p = fract(p * vec2(123.34, 456.21));
         p += dot(p, p + 34.56);
-        return fract(p.x * p.y);
+        return fract(p * p);
     }
 
     vec2 random2(vec2 p) {
@@ -16,10 +26,9 @@ shader main {
         vec2 g = floor(p);
         vec2 f = fract(p);
 
-        float d = 1.0;
-        for (int j = -1; j <= 1; j++) {
-            for (int i = -1; i <= 1; i++) {
-                vec2 b = vec2(float(i), float(j));
+        for (int j = -1; j < 1; j++) {
+            for (int i = -1; i < 1; i++) {
+                vec2 b = vec2(i,j);
                 vec2 r = b - f + random2(g + b);
                 float d2 = dot(r, r);
 
@@ -33,10 +42,9 @@ shader main {
     }
 
     void main() {
-        vec2 uv = texCoord * 10.0;
-        float v = voronoi(uv);
-
+        float v = voronoi(fragTexCoord);
         vec3 color = vec3(v);
         fragColor = vec4(color, 1.0);
     }
+}
 }

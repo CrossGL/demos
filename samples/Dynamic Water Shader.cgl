@@ -1,26 +1,22 @@
 shader main {
     vertex {
-        input vec2 position;
-        output vec4 color;
-
-        float wave(vec2 p, float time) {
-            return sin(p.x * 10.0 + time * 2.0) * 0.1 + sin(p.y * 10.0 + time * 2.0) * 0.1;
-        }
-
-        void main() {
-            vec2 uv = position;
-            float waterHeight = wave(uv, iTime);
-            vec3 colorComputed = vec3(0.0, 0.3, 0.8) * (1.0 + waterHeight);
-            color = vec4(colorComputed, 1.0);
-        }
+        // Vertex shader logic goes here.
     }
 
     fragment {
-        input vec4 color;
+        input vec2 position;
         output vec4 fragColor;
 
+        float wave(vec2 p, float time) {
+            return sin(p.x * 10.0) * 0.1 + sin(p.y * 10.0) * 0.1;
+        }
+        
         void main() {
-            fragColor = color;
+            vec2 uv = position;
+            float waterHeight = wave(uv, 0.0); // Placeholder for time value
+            vec3 color = vec3(0.0, 0.3, 0.8) * (1.0 + waterHeight);
+
+            fragColor = vec4(color, 1.0);
         }
     }
 }

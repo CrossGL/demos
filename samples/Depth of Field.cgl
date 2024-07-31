@@ -1,37 +1,31 @@
 shader main {
-    vertex {
-        input vec2 texCoord;
-        output vec4 color;
+vertex {
+    input vec2 texCoord;
+    output vec2 fragCoord;
 
-        // Pass through the texture coordinate
-        void main() {
-            color = vec4(texCoord, 0.0, 1.0);
-        }
+    // Pass through the texture coordinates to the fragment shader
+    void main() {
+        fragCoord = texCoord;
     }
+}
 
-    fragment {
-        input vec4 color; // This contains the texture coordinate
-        output vec4 fragColor;
+fragment {
+    input vec2 fragCoord;
+    output vec4 fragColor;
 
-        uniform sampler2D texture;
-        uniform sampler2D depthTexture;
-        uniform float focusDepth;
-        uniform float focusRange;
+    void main() {
+        float depth = texture(depthTexture, fragCoord);
+        float blur = clamp(abs(depth - focusDepth) / focusRange, 0.0, 1.0);
 
-        void main() {
-            vec2 texCoord = color.xy; // Extract the texture coordinate
-            float depth = texture(depthTexture, texCoord).r;
-            float blur = clamp(abs(depth - focusDepth) / focusRange, 0.0, 1.0);
-
-            vec4 colorAccum = vec4(0.0);
-            for (int i = -4; i <= 4; i++) {
-                for (int j = -4; j <= 4; j++) {
-                    vec2 offset = vec2(i, j) * blur / 512.0;
-                    colorAccum += texture(texture, texCoord + offset);
-                }
+        vec4 color = vec4(0.0);
+        for (int i = -4; i < 4; i++) {
+            for (int j = -4; j < 4; j++) {
+                vec2 offset = vec2(i, j) * blur / 512.0;
+                color += texture(texture, fragCoord + offset);
             }
-            colorAccum /= 81.0;
-            fragColor = colorAccum;
         }
+        color /= 81.0;
+        fragColor = color;
     }
+}
 }

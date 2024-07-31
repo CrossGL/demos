@@ -1,11 +1,21 @@
 shader main {
+vertex {
     input vec2 texCoord;
+    output vec2 fragTexCoord;
+
+    // Pass through texCoord to the fragment shader
+    void main() {
+        fragTexCoord = texCoord;
+    }
+}
+
+fragment {
+    input vec2 fragTexCoord;
     output vec4 fragColor;
 
-    uniform sampler2D texture;
-
     void main() {
-        vec4 color = texture(texture, texCoord);
-        fragColor = vec4(vec3(1.0) - color.rgb, 1.0);
+        vec4 color = texture(texture, fragTexCoord);
+        fragColor = vec4(vec3(1.0) - color, 1.0);
     }
+}
 }

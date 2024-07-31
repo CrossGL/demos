@@ -7,7 +7,7 @@ shader main {
             color = vec4(position, 1.0);
         }
     }
-
+    
     fragment {
         input vec4 color;
         output vec4 fragColor;

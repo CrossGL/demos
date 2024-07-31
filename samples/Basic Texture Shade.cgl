@@ -12,11 +12,10 @@ shader main {
 
     fragment {
         input vec2 fragTexCoord;
-        uniform sampler2D texture;
         output vec4 fragColor;
 
         void main() {
-            fragColor = texture(texture, fragTexCoord);
+            fragColor = textureColor;
         }
     }
 }
