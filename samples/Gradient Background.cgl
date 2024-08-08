@@ -1,20 +1,27 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    vertex {
+        input vec2 texCoord;
+        // Simulated topColor and bottomColor
+        input vec3 topColor;
+        input vec3 bottomColor;
+        output vec2 passTexCoord;
 
-    void main() {
-        fragTexCoord = texCoord;
-    }
-}
 
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
-    
-    void main() {
-        vec3 color = mix(bottomColor, topColor, fragTexCoord.y);
-        fragColor = vec4(color, 1.0);
+        void main() {
+            passTexCoord = texCoord;
+        }
     }
-}
+
+    fragment {
+        input vec2 passTexCoord;
+        // Simulated topColor and bottomColor
+        input vec3 topColor;
+        input vec3 bottomColor;
+        output vec4 fragColor;
+
+        void main() {
+            vec3 color = mix(bottomColor, topColor, passTexCoord.y);
+            fragColor = vec4(color, 1.0);
+        }
+    }
 }

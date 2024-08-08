@@ -5,7 +5,10 @@ shader main {
         output vec2 fragTexCoord;
 
         void main() {
+            // Pass texture coordinates to the fragment shader
             fragTexCoord = texCoord;
+
+            // Set the position of the vertex
             gl_Position = vec4(position, 1.0);
         }
     }
@@ -14,8 +17,15 @@ shader main {
         input vec2 fragTexCoord;
         output vec4 fragColor;
 
+        // Simulate texture sampling function
+        vec4 textureSample(vec2 texCoord) {
+            // Example simulated texture color based on texCoord
+            return vec4(texCoord, 0.5, 1.0); // Simulated texture color
+        }
+
         void main() {
-            fragColor = textureColor;
+            // Sample the texture using the simulated texture sampling function
+            fragColor = textureSample(fragTexCoord);
         }
     }
 }

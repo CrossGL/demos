@@ -2,48 +2,57 @@ shader advancedShader {
     vertex {
         input vec3 position;
         input vec2 texCoord;
-        output vec2 fragTexCoord;
-        output vec3 fragPosition;
+        output vec4 color;
 
-        void main() {
-            fragTexCoord = texCoord;
-            fragPosition = position;
-            gl_Position = vec4(position, 1.0);
-        }
-    }
-
-    fragment {
-        input vec2 fragTexCoord;
-        input vec3 fragPosition;
-        output vec4 fragColor;
-
-        vec3 calculateSpecular(vec3 normal, vec3 lightDir, vec3 viewDir) {
+        vec3 calculateSpecular(vec3 normal, vec3 lightDir, vec3 viewDir, float shininess) {
             vec3 reflectDir = reflect(-lightDir, normal);
-            float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);  // Default shininess
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
             return spec * vec3(1.0, 1.0, 1.0);  // White specular highlight
         }
 
         void main() {
-            vec4 texColor = texture2D(textureSampler, fragTexCoord); // Default sampler
+            // Pass texture coordinates to the fragment shader
+            color.xy = texCoord;
 
-            vec3 norm = normalize(cross(dFdx(fragPosition), dFdy(fragPosition)));
-            vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0) - fragPosition); // Default light position
-            vec3 viewDir = normalize(vec3(0.0, 0.0, 1.0) - fragPosition); // Default view position
+            // Simulate ambient, light position, view position, and shininess
+            vec3 ambientColor = vec3(0.1, 0.1, 0.1);
+            vec3 lightPos = vec3(10.0, 10.0, 10.0);
+            vec3 viewPos = vec3(0.0, 0.0, 10.0);
+            float shininess = 32.0;
+
+            // Calculate normal in the vertex shader
+            vec3 norm = normalize(cross(dFdx(position), dFdy(position)));
+            vec3 lightDir = normalize(lightPos - position);
+            vec3 viewDir = normalize(viewPos - position);
 
             // Ambient component
-            vec3 ambient = vec3(0.1, 0.1, 0.1);  // Default ambient color
+            vec3 ambient = ambientColor;
 
             // Diffuse component
             float diff = max(dot(norm, lightDir), 0.0);
             vec3 diffuse = diff * vec3(1.0, 1.0, 1.0);  // White diffuse light
 
             // Specular component
-            vec3 specular = calculateSpecular(norm, lightDir, viewDir);
+            vec3 specular = calculateSpecular(norm, lightDir, viewDir, shininess);
 
             vec3 lighting = ambient + diffuse + specular;
-            vec4 color = vec4(lighting, 1.0) * texColor;
+            color.rgb = lighting;
+            color.a = 1.0; // Alpha channel
+        }
+    }
 
-            fragColor = color;
+    fragment {
+        input vec4 color;
+        output vec4 fragColor;
+
+        vec4 textureSample(vec2 texCoord) {
+            // Example function to simulate texture sampling
+            return vec4(texCoord.x, texCoord.y, 0.5, 1.0); // Simulated texture color
+        }
+
+        void main() {
+            vec4 texColor = textureSample(color.xy);
+            fragColor = vec4(color.rgb * texColor.rgb, 1.0);
         }
     }
 }

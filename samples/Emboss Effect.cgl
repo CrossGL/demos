@@ -1,39 +1,45 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    vertex {
+        input vec2 texCoord;
+        output vec2 passTexCoord;
 
-    void main() {
-        fragTexCoord = texCoord;
+        void main() {
+            passTexCoord = texCoord;
+        }
+    }
+
+    fragment {
+        input vec2 passTexCoord;
+        // Simulated input values
+        input vec4 textureData; // Example for a 512x512 texture
+        input int textureWidth;
+        input int textureHeight;
+        output vec4 fragColor;
+
+        vec4 texture(vec4 texData, vec2 coord, int width, int height) {
+            // Convert coord to texture indices
+            int x = int(coord.x * float(width));
+            int y = int(coord.y * float(height));
+            // Clamp the indices to texture dimensions
+            x = clamp(x, 0, width - 1);
+            y = clamp(y, 0, height - 1);
+            // Calculate the 1D array index
+            int index = y * width + x;
+            // Return the color from the texture data
+            return texData;
+        }
+
+        void main() {
+            vec2 texCoord = passTexCoord; // Extract the texture coordinate
+            vec2 offset = vec2(1.0 / float(textureWidth), 1.0 / float(textureHeight));
+            vec3 color = texture(textureData, texCoord, textureWidth, textureHeight);
+            vec3 colorRight = texture(textureData, texCoord + vec2(offset.x, 0.0), textureWidth, textureHeight);
+            vec3 colorUp = texture(textureData, texCoord + vec2(0.0, offset.y), textureWidth, textureHeight);
+            color = color.rgb;
+            colorRight = colorRight.rgb;
+            colorUp = colorUp.rgb;
+            vec3 edge = abs(color - colorRight) + abs(color - colorUp);
+            fragColor = vec4(edge, 1.0);
+        }
     }
 }
-
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
-
-    void main() {
-        vec2 texOffset = vec2(1.0 / 512.0);
-
-        vec3 center = texture(texture, fragTexCoord);
-        vec3 north = texture(texture, fragTexCoord + vec2(0.0, texOffset));
-        vec3 south = texture(texture, fragTexCoord - vec2(0.0, texOffset));
-        vec3 east = texture(texture, fragTexCoord + vec2(texOffset, 0.0));
-        vec3 west = texture(texture, fragTexCoord - vec2(texOffset, 0.0));
-        vec3 northwest = texture(texture, fragTexCoord + vec2(-texOffset, texOffset));
-        vec3 northeast = texture(texture, fragTexCoord + vec2(texOffset, texOffset));
-        vec3 southwest = texture(texture, fragTexCoord + vec2(-texOffset, -texOffset));
-        vec3 southeast = texture(texture, fragTexCoord + vec2(texOffset, -texOffset));
-
-        vec3 color = center * -1.0 +
-                     north * -1.0 +
-                     south * -1.0 +
-                     east * -1.0 +
-                     west * -1.0 +
-                     northwest * 1.0 +
-                     northeast * 1.0 +
-                     southwest * 1.0 +
-                     southeast * 1.0;
-
-        fragColor = vec4(color + vec3(0.5), 1.0);
-    }
