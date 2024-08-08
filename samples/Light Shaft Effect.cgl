@@ -1,55 +1,27 @@
 shader main {
-    vertex {
-        input vec2 texCoord;
+vertex {
+    input vec3 position;
+    input vec3 normal;
+    output vec3 fragPosition;
+    output vec3 fragNormal;
 
-        // Simulated inputs for texture data and light position
-        input vec4 textureData; // Example for a 512x512 texture
-        input vec2 lightPos; // Simulated light position
-        input vec2 textureSize; // Size of the texture (width, height)
-        output vec2 texCoordOut;
-
-        void main() {
-            texCoordOut = texCoord;
-        }
+    // Pass through position and normal to the fragment shader
+    void main() {
+        fragPosition = position;
+        fragNormal = normal;
     }
+}
 
-    fragment {
-        input vec2 texCoordOut;
+fragment {
+    input vec3 fragPosition;
+    input vec3 fragNormal;
+    output vec4 fragColor;
 
-        // Simulated inputs for texture data and light position
-        input vec4 textureData; // Example for a 512x512 texture
-        input vec2 lightPos; // Simulated light position
-        input vec2 textureSize; // Size of the texture (width, height)
-        output vec4 fragColor;
-
-        vec4 texture(vec4 texData, vec2 coord, vec2 size) {
-            // Convert coord to texture indices
-            int x = int(coord.x * size.x);
-            int y = int(coord.y * size.y);
-            // Clamp the indices to texture dimensions
-            x = clamp(x, 0, int(size.x) - 1);
-            y = clamp(y, 0, int(size.y) - 1);
-            // Calculate the 1D array index
-            int index = y * int(size.x) + x;
-            // Return the color from the texture data
-            return texData;
-        }
-
-        void main() {
-            vec2 uv = texCoordOut;
-            vec4 color = texture(textureData, uv, textureSize);
-            vec2 dir = uv - lightPos;
-            float dist = length(dir);
-
-            // Compute offset based on distance
-            vec2 offset = dir * (1.0 - dist) / textureSize; // Normalize by textureSize
-            vec2 uvOffset = uv - offset;
-
-            // Sample the texture at the offset position
-            vec4 shaftColor = texture(textureData, uvOffset, textureSize);
-
-            // Mix the original color with the shaft color
-            fragColor = mix(color, shaftColor, 0.5);
-        }
+    void main() {
+        vec3 viewDir = normalize(viewPos - fragPosition);
+        float rim = pow(1.0 - max(dot(fragNormal, viewDir), 0.0), rimPower);
+        vec3 color = vec3(0.5, 0.5, 0.5) + rim * rimColor;
+        fragColor = vec4(color, 1.0);
     }
+}
 }

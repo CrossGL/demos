@@ -1,59 +1,24 @@
 shader main {
-    vertex {
-        input vec2 texCoord;
-        
-        // Simulated input for texture data and segments
-        input vec4 textureData; // Example for a 512x512 texture
-        input float segments;
-        input vec2 textureSize; // Size of the texture (width, height)
-        output vec2 texCoordOut;
+vertex {
+    input vec2 texCoord;
+    output vec2 fragTexCoord;
 
-
-        void main() {
-            texCoordOut = texCoord;
-        }
+    void main() {
+        fragTexCoord = texCoord;
     }
+}
 
-    fragment {
-        input vec2 texCoordOut;
+fragment {
+    input vec2 fragTexCoord;
+    output vec4 fragColor;
 
-        // Simulated input for texture data and segments
-        input vec4 textureData; // Example for a 512x512 texture
-        input float segments;
-        input vec2 textureSize; // Size of the texture (width, height)
-        output vec4 fragColor;
-
-        vec4 texture(vec4 texData, vec2 coord, vec2 size) {
-            // Convert coord to texture indices
-            int x = int(coord.x * size.x);
-            int y = int(coord.y * size.y);
-            // Clamp the indices to texture dimensions
-            x = clamp(x, 0, int(size.x) - 1);
-            y = clamp(y, 0, int(size.y) - 1);
-            // Calculate the 1D array index
-            int index = y * int(size.x) + x;
-            // Return the color from the texture data
-            return texData;
-        }
-
-        void main() {
-            // Compute the angle of the current texCoord relative to the center
-            float angle = atan(texCoordOut.y - 0.5, texCoordOut.x - 0.5);
-            
-            // Compute the radius from the center of the texture
-            float radius = length(texCoordOut - vec2(0.5));
-            
-            // Determine the segment index based on the angle and number of segments
-            float segment = floor(segments * angle / (2.0 * 3.14159265));
-            
-            // Compute the new angle corresponding to the segment
-            float newAngle = segment * 2.0 * 3.14159265 / segments;
-            
-            // Compute the new texture coordinates based on the new angle
-            vec2 newTexCoord = vec2(0.5) + radius * vec2(cos(newAngle), sin(newAngle));
-            
-            // Sample the texture at the new texture coordinates
-            fragColor = texture(textureData, newTexCoord, textureSize);
-        }
+    void main() {
+        float angle = atan(fragTexCoord.y - 0.5, fragTexCoord.x - 0.5);
+        float radius = length(fragTexCoord - vec2(0.5));
+        float segment = floor(segments * angle / (2.0 * 3.14159265));
+        float newAngle = segment * 2.0 * 3.14159265 / segments;
+        vec2 newTexCoord = vec2(0.5) + radius * vec2(cos(newAngle), sin(newAngle));
+        fragColor = texture(texture, newTexCoord);
     }
+}
 }

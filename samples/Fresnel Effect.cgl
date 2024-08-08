@@ -1,39 +1,28 @@
 shader main {
-    vertex {
-        input vec3 position;
-        input vec3 normal;
-        input vec3 viewDir; // Simulated uniform
+vertex {
+    input vec3 position;
+    input vec3 normal;
+    output vec4 fragColor;
 
-        output vec3 passNormal;
-        output vec3 passViewDir;
+    // Vertex shader code, if needed
+    // For this example, there's no actual vertex shader code
+}
 
-        
-        float fresnelEffect(vec3 normal, vec3 viewDir) {
-            return pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0);
-        }
+fragment {
+    input vec3 normal;
+    output vec4 fragColor;
 
-        void main() {
-            passNormal = normal;
-            passViewDir = viewDir;
-        }
+    float fresnelEffect(vec3 normal, vec3 viewDir) {
+        return pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0);
     }
 
-    fragment {
-        input vec3 passNormal;
-        input vec3 passViewDir;
-        output vec4 fragColor;
+    void main() {
+        vec3 norm = normalize(normal);
+        vec3 viewDir = vec3(0.0, 0.0, 1.0); // Example view direction
+        float fresnel = fresnelEffect(norm, normalize(viewDir));
+        vec3 color = vec3(0.1, 0.5, 1.0) * fresnel;
 
-        float fresnelEffect(vec3 normal, vec3 viewDir) {
-            return pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0);
-        }
-
-        void main() {
-            vec3 norm = normalize(passNormal);
-            vec3 viewDir = normalize(passViewDir);
-            float fresnel = fresnelEffect(norm, viewDir);
-            vec3 color = vec3(0.1, 0.5, 1.0) * fresnel;
-
-            fragColor = vec4(color, 1.0);
-        }
+        fragColor = vec4(color, 1.0);
     }
+}
 }

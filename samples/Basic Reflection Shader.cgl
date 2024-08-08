@@ -17,31 +17,12 @@ shader main {
         input vec3 fragNormal;
         output vec4 fragColor;
 
-        // Simulate texture sampling function
-        vec4 textureSample(vec2 texCoord) {
-            // Example simulated texture color based on texCoord
-            return vec4(texCoord, 0.5, 1.0); // Simulated texture color
-        }
-
-        // Simulate environment map sampling function
-        vec4 cubeTextureSample(vec3 direction) {
-            // Example simulated cube map color based on direction
-            return vec4(abs(direction), 1.0); // Simulated environment map color
-        }
-
-        
-
         void main() {
-            // Simulate view position
-            vec3 viewPos = vec3(0.0, 0.0, 5.0); // Example view position
             vec3 norm = normalize(fragNormal);
             vec3 viewDir = normalize(viewPos - fragPosition);
             vec3 reflectDir = reflect(-viewDir, norm);
 
-            vec3 environmentColor = cubeTextureSample(reflectDir);
-            vec3 objectColor = textureSample(fragPosition.xy);
-
-            fragColor = vec4(mix(objectColor.rgb, environmentColor.rgb, 0.5), 1.0);
+            fragColor = vec4(mix(objectColor, environmentColor, 0.5), 1.0);
         }
     }
 }

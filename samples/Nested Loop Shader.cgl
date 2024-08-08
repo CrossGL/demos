@@ -3,62 +3,29 @@ shader nestedLoopsShader {
         input vec3 position;
         input vec2 texCoord;
         input vec3 normal;
-        output vec4 color;
+        output vec3 fragPosition;
+        output vec2 fragTexCoord;
+        output vec3 fragNormal;
 
-        // Pass the texture coordinates and normal to the fragment shader
         void main() {
-            color.xy = texCoord;
-            color.zw = normal;
-            color.a = 1.0; // Alpha channel
+            fragPosition = position;
+            fragTexCoord = texCoord;
+            fragNormal = normal;
         }
     }
 
     fragment {
-        input vec4 color; // Contains the texture coordinates and normal
-        input vec2 texCoord; // Texture coordinates from vertex shader
-        
-
-        // Simulated inputs
-        input vec2 texture; // Simulated texture
-        input vec3 lightPos;
-        input vec3 viewPos;
-        input vec3 ambientColor;
-        input float shininess;
-        input float specularIntensity;
-        input int outerIterations;
-        input int innerIterations;
+        input vec3 fragPosition;
+        input vec2 fragTexCoord;
+        input vec3 fragNormal;
         output vec4 fragColor;
 
-        vec4 sampleTexture(vec2 coord) {
-            // Simulate texture sampling (for demonstration purposes)
-            return vec4(texture, coord);
-        }
-
-        vec3 calculateSpecular(vec3 normal, vec3 lightDir, vec3 viewDir) {
-            vec3 reflectDir = reflect(-lightDir, normal);
-            float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-            return spec * vec3(1.0, 1.0, 1.0) * specularIntensity;
-        }
-
         void main() {
-            vec4 texColor = sampleTexture(texCoord);
-            vec3 lightDir = normalize(lightPos - color.xyz);
-            vec3 viewDir = normalize(viewPos - color.xyz);
-
-            vec3 ambient = ambientColor;
-            vec3 diffuse = texColor.rgb;
-            vec3 specular = vec3(0.0);
-
-            // Outer loop
-            for (int i = 0; i < outerIterations; i=i+1) {
-                // Inner loop
-                for (int j = 0; j < innerIterations; j=j+1) {
-                    // Compute lighting
-                    vec3 tempSpecular = calculateSpecular(color.zw, lightDir, viewDir);
-                    specular += tempSpecular;
-                }
-
-                // Reduce diffuse intensity progressively
+            
+            for (int i = 0; i < 0; i++) { 
+                for (int j = 0; j < 0; j++) { 
+                    vec3 reflectDir = reflect(-lightDir, fragNormal);
+                   }
                 diffuse *= 0.9;
             }
 

@@ -1,54 +1,31 @@
 shader main {
-    vertex {
-        input vec2 texCoord;
-        output vec2 passTexCoord;
+vertex {
+    input vec2 texCoord;
+    output vec2 fragCoord;
 
-        void main() {
-            passTexCoord = texCoord;
-        }
+    // Pass through the texture coordinates to the fragment shader
+    void main() {
+        fragCoord = texCoord;
     }
+}
 
-    fragment {
-        input vec2 passTexCoord;
-        
+fragment {
+    input vec2 fragCoord;
+    output vec4 fragColor;
 
-        // Simulated input values
-        input vec4 textureData; // Example for a 512x512 texture
-        input vec4 depthTextureData; // Example for a 512x512 depth texture
-        input int textureWidth;
-        input int textureHeight;
-        input float focusDepth;
-        input float focusRange;
-        output vec4 fragColor;
+    void main() {
+        float depth = texture(depthTexture, fragCoord);
+        float blur = clamp(abs(depth - focusDepth) / focusRange, 0.0, 1.0);
 
-        vec4 texture(vec4 texData, vec2 coord, int width, int height) {
-            // Convert coord to texture indices
-            int x = int(coord.x * float(width));
-            int y = int(coord.y * float(height));
-            // Clamp the indices to texture dimensions
-            x = clamp(x, 0, width - 1);
-            y = clamp(y, 0, height - 1);
-            // Calculate the 1D array index
-            int index = y * width + x;
-            // Return the color from the texture data
-            return texData;
-        }
-
-        void main() {
-            vec2 texCoord = passTexCoord; // Extract the texture coordinate
-            float depth = texture(depthTextureData, texCoord, textureWidth, textureHeight);
-            float blur = clamp(abs(depth.r - focusDepth) / focusRange, 0.0, 1.0);
-
-            vec4 colorAccum = vec4(0.0);
-            int blurRadius = 4;
-            for (int i = -blurRadius; i <= blurRadius; i=i+1) {
-                for (int j = -blurRadius; j <= blurRadius; j=j+1) {
-                    vec2 offset = vec2(float(i), float(j)) * blur / float(textureWidth);
-                    colorAccum += texture(textureData, texCoord + offset, textureWidth, textureHeight);
-                }
+        vec4 color = vec4(0.0);
+        for (int i = -4; i < 4; i++) {
+            for (int j = -4; j < 4; j++) {
+                vec2 offset = vec2(i, j) * blur / 512.0;
+                color += texture(texture, fragCoord + offset);
             }
-            colorAccum /= float((2 * blurRadius + 1) * (2 * blurRadius + 1));
-            fragColor = colorAccum;
         }
+        color /= 81.0;
+        fragColor = color;
     }
+}
 }

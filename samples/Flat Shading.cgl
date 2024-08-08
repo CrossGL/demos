@@ -1,21 +1,24 @@
 shader main {
-    vertex {
-        input vec3 position;
-        input vec3 normal;
-        output vec3 passNormal;
+vertex {
+    input vec3 position;
+    input vec3 normal;
+    output vec3 fragNormal;
 
-        void main() {
-            passNormal = normal;
-        }
+    void main() {
+        fragNormal = normal;
     }
+}
 
-    fragment {
-        input vec3 passNormal;
-        output vec4 fragColor;
+fragment {
+    input vec3 fragNormal;
+    output vec4 fragColor;
 
-        void main() {
-            vec3 color = vec3(0.5, 0.5, 0.5) + 0.5 * passNormal;
-            fragColor = vec4(color, 1.0);
-        }
+    void main() {
+        // Base color
+        vec3 baseColor = vec3(0.5, 0.5, 0.5);
+        // Adjust color based on normal
+        vec3 color = baseColor + 0.5 * fragNormal;
+        fragColor = vec4(color, 1.0);
     }
+}
 }

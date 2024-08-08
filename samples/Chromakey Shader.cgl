@@ -1,35 +1,28 @@
 shader main {
-    vertex {
-        input vec2 texCoord;
-        output vec2 fragTexCoord;
+vertex {
+    input vec2 texCoord;
+    output vec2 fragTexCoord;
 
-        void main() {
-            fragTexCoord = texCoord;
-            gl_Position = vec4(0.0, 0.0, 0.0, 1.0); // This should be set properly for your use case
+    void main() {
+        fragTexCoord = texCoord;
+    }
+}
+
+fragment {
+    input vec2 fragTexCoord;
+    output vec4 fragColor;
+
+    void main() {
+        vec4 color = texture(texture, fragTexCoord);
+        vec3 keyColor = vec3(1.0, 0.0, 0.0); // Example key color
+        float threshold = 0.1; // Example threshold
+
+        float diff = length(color - keyColor);
+        if (diff < threshold) {
+            discard;
+        } else {
+            fragColor = color;
         }
     }
-
-    fragment {
-        input vec2 fragTexCoord;
-        output vec4 fragColor;
-
-        vec4 textureColor(vec2 coord) {
-            // Example function to simulate texture sampling
-            return vec4(coord.x, coord.y, 0.5, 1.0); // Simulated texture color
-        }
-
-        void main() {
-            vec3 keyColor = vec3(0.0, 1.0, 0.0); // Example key color
-            float threshold = 0.1; // Example threshold
-
-            vec4 color = textureColor(fragTexCoord);
-            float diff = length(color.rgb - keyColor);
-            if (diff < threshold) {
-                // Discard fragment
-                fragColor = vec4(0.0, 0.0, 0.0, 0.0);
-            } else {
-                fragColor = color;
-            }
-        }
-    }
+}
 }

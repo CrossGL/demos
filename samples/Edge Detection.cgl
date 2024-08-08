@@ -1,45 +1,27 @@
 shader main {
-    vertex {
-        input vec2 texCoord;
-        output vec2 passTexCoord;
+vertex {
+    input vec2 texCoord;
+    output vec2 fragCoord;
 
-        void main() {
-            passTexCoord = texCoord;
-        }
+    // Pass through the texCoord as fragCoord for simplicity
+    void main() {
+        fragCoord = texCoord;
     }
+}
 
-    fragment {
-        input vec2 passTexCoord;
-        // Simulated input values
-        input vec4 textureData; // Example for a 512x512 texture
-        input int textureWidth;
-        input int textureHeight;
-        output vec4 fragColor;
+fragment {
+    input vec2 fragCoord;
+    output vec4 fragColor;
 
-        vec4 texture(vec4 texData, vec2 coord, int width, int height) {
-            // Convert coord to texture indices
-            int x = int(coord.x * float(width));
-            int y = int(coord.y * float(height));
-            // Clamp the indices to texture dimensions
-            x = clamp(x, 0, width - 1);
-            y = clamp(y, 0, height - 1);
-            // Calculate the 1D array index
-            int index = y * width + x;
-            // Return the color from the texture data
-            return texData;
-        }
+    void main() {
+        vec2 texCoord = fragCoord;
+        vec2 offset = vec2(1.0 / 512.0, 1.0 / 512.0);
+        vec3 color = texture(texture, texCoord);
+        vec3 colorRight = texture(texture, texCoord + vec2(offset.x, 0.0));
+        vec3 colorUp = texture(texture, texCoord + vec2(0.0, offset.y));
 
-        void main() {
-            vec2 texCoord = passTexCoord; // Extract the texture coordinate
-            vec2 offset = vec2(1.0 / float(textureWidth), 1.0 / float(textureHeight));
-            vec3 color = texture(textureData, texCoord, textureWidth, textureHeight);
-            vec3 colorRight = texture(textureData, texCoord + vec2(offset.x, 0.0), textureWidth, textureHeight);
-            vec3 colorUp = texture(textureData, texCoord + vec2(0.0, offset.y), textureWidth, textureHeight);
-            color = color.rgb;
-            colorRight = colorRight.rgb;
-            colorUp = colorUp.rgb;
-            vec3 edge = abs(color - colorRight) + abs(color - colorUp);
-            fragColor = vec4(edge, 1.0);
-        }
+        vec3 edge = abs(color - colorRight) + abs(color - colorUp);
+        fragColor = vec4(edge, 1.0);
     }
+}
 }

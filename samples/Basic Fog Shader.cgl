@@ -17,23 +17,11 @@ shader main {
         input vec3 fragPosition;
         output vec4 fragColor;
 
-        // Simulate texture sampling function
-        vec4 textureSample(vec2 texCoord) {
-            // Simulated texture color based on texCoord
-            return vec4(texCoord, 0.5, 1.0); // Example color with depth information in the red channel
-        }
-
-
         void main() {
-            
-            vec3 baseColor = textureSample(fragTexCoord);
-
-            // Calculate depth based on position (simple distance from origin)
+           
             float depth = length(fragPosition);
             float fogFactor = exp(-fogDensity * depth);
-
-            // Compute final color with fog effect
-            vec3 finalColor = mix(fogColor, baseColor.rgb, fogFactor);
+            vec3 finalColor = mix(fogColor, baseColor, fogFactor);
             fragColor = vec4(finalColor, 1.0);
         }
     }

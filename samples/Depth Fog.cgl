@@ -1,37 +1,30 @@
 shader main {
-    vertex {
-        input vec3 position;
-        input vec3 normal;
-        input vec2 texCoord;
-        output vec2 passTexCoord;
-        output float passDepth;
+vertex {
+    input vec3 position;
+    input vec3 normal;
+    input vec2 texCoord;
+    output vec3 fragPosition;
+    output vec2 fragTexCoord;
 
-        void main() {
-            passTexCoord = texCoord;
-            passDepth = length(position);
-        }
+    void main() {
+        fragPosition = position;
+        fragTexCoord = texCoord;
     }
+}
 
-    fragment {
-        input vec2 passTexCoord;
-        input float passDepth;
-        // Simulated input values
-        input float texture;
-        input float fogDensity;
-        input vec3 fogColor;
-        output vec4 fragColor;
+fragment {
+    input vec3 fragPosition;
+    input vec2 fragTexCoord;
+    output vec4 fragColor;
 
-        // Simulated texture function
-        vec4 get_texture(float tex, vec2 coord) {
-            return vec4(coord.x, coord.y, 0.5, 1.0);
-        }
 
-        void main() {
-            vec3 baseColor = get_texture(texture, passTexCoord);
-            float fogFactor = exp(-fogDensity * passDepth);
-            vec3 finalColor = mix(fogColor, baseColor.rgb, fogFactor);
+    void main() {
+        vec3 baseColor = texture(texture, fragTexCoord);
+        float depth = length(fragPosition);
+        float fogFactor = exp(-fogDensity * depth);
+        vec3 finalColor = mix(fogColor, baseColor, fogFactor);
 
-            fragColor = vec4(finalColor, 1.0);
-        }
+        fragColor = vec4(finalColor, 1.0);
     }
+}
 }
