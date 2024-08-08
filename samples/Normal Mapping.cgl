@@ -1,34 +1,44 @@
-vertex {
-    input vec3 position;
-    input vec3 normal;
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
-    output vec3 fragPosition;
-    output vec3 fragNormal;
+shader main {
+    vertex {
+        input vec3 position;
+        input vec3 normal;
+        output vec4 color; // To pass the normal and position
 
-    void main() {
-        fragTexCoord = texCoord;
-        fragPosition = position;
-        fragNormal = normal;
+
+        void main() {
+            // Define constants for light and view positions
+            vec3 lightPos = vec3(1.0, 1.0, 1.0); // Example light position
+            vec3 viewPos = vec3(0.0, 0.0, 5.0);  // Example view position
+            float shininess = 32.0;
+            vec3 norm = normalize(normal);
+            vec3 lightDir = normalize(lightPos - position); // Direction of light
+            vec3 viewDir = normalize(viewPos - position);   // Direction of view
+
+            // Calculate lighting
+            float ambient = 0.1;
+            float diff = max(dot(norm, lightDir), 0.0);
+            vec3 reflectDir = reflect(-lightDir, norm);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+
+            // Combine lighting components
+            color.rgb = ambient + diff + spec;
+            color.a = 1.0; // Alpha channel
+        }
     }
-}
 
-fragment {
-    input vec2 fragTexCoord;
-    input vec3 fragPosition;
-    input vec3 fragNormal;
-    output vec4 fragColor;
+    fragment {
+        input vec4 color; // This contains the lighting information
+        input vec2 texCoord;
+        output vec4 fragColor;
 
-    
-    void main() {
-        vec3 norm = normalize(texture(normalMap, fragTexCoord) * 2.0 - 1.0);
-        vec3 lightDir = normalize(lightPos - fragPosition);
-        float diff = max(dot(norm, lightDir), 0.0);
-        vec3 reflectDir = reflect(-lightDir, norm);
-        vec3 viewDir = normalize(viewPos - fragPosition);
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
-        vec3 color = texture(texture, fragTexCoord);
-        fragColor = vec4((0.1 + diff + spec) * color, 1.0);
+       
+
+        void main() {
+             // Sample texture (assuming `texture` is a built-in function in this environment)
+            vec4 texColor = texture(texture, texCoord); // Sample texture using coordinates
+            vec3 ambient = vec3(0.1, 0.1, 0.1); // Hardcoded ambient color
+            vec3 finalColor = ambient + color.rgb * texColor.rgb; // Combine ambient and texture color
+            fragColor = vec4(finalColor, 1.0); // Final output color
+        }
     }
-}
 }

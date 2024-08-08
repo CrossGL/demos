@@ -1,24 +1,34 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragCoord;
+    vertex {
+        input vec2 texCoord;
+        output vec4 color;
 
-    // Pass through the texture coordinates to the fragment shader
-    void main() {
-        fragCoord = texCoord;
+        // Pass through the texture coordinate
+        void main() {
+            color = vec4(texCoord, 0.0, 1.0);
+        }
     }
-}
 
-fragment {
-    input vec2 fragCoord;
-    output vec4 fragColor;
+    fragment {
+        input vec4 color; // This contains the texture coordinate
+        output vec4 fragColor;
 
-    void main() {
-        vec2 offset = vec2(aberration / 512.0);
-        vec4 red = texture(texture, fragCoord + offset);
-        vec4 green = texture(texture, fragCoord);
-        vec4 blue = texture(texture, fragCoord - offset);
-        fragColor = vec4(red.r, green.g, blue.b, 1.0);
+        vec4 textureColor(vec2 coord) {
+            // Example function to simulate texture sampling
+            return vec4(coord.x, coord.y, 0.5, 1.0); // Simulated texture color
+        }
+
+        void main() {
+            vec2 texCoord = color.xy; // Extract the texture coordinate
+
+            float aberration = 0.005; // Example aberration value
+            vec2 offset = vec2(aberration / 512.0);
+            
+            vec4 red = textureColor(texCoord + offset);
+            vec4 green = textureColor(texCoord);
+            vec4 blue = textureColor(texCoord - offset);
+
+            fragColor = vec4(red.r, green.g, blue.b, 1.0);
+        }
     }
-}
 }

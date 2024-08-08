@@ -1,34 +1,37 @@
 shader main {
-vertex {
-    input vec3 position;
-    input vec3 normal;
-    output vec4 fragColor;
+    vertex {
+        input vec3 position;
+        input vec3 normal;
+        // Simulated inputs
+        input vec3 lightPos;
+        input vec3 viewPos;
+        input float metallic;
+        output vec4 color;
 
-    // Vertex shader code, if needed
-    // For this example, there's no actual vertex shader code
-}
+        vec3 calculateLighting(vec3 normal, vec3 lightDir, vec3 viewDir) {
+            float ambient = 0.1;
+            float diff = max(dot(normal, lightDir), 0.0);
+            vec3 reflectDir = reflect(-lightDir, normal);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+            return ambient + diff + metallic * spec;
+        }
 
-fragment {
-    input vec3 position;
-    input vec3 normal;
-    output vec4 fragColor;
-
-    vec3 calculateLighting(vec3 normal, vec3 lightDir, vec3 viewDir) {
-        float ambient = 0.1;
-        float diff = max(dot(normal, lightDir), 0.0);
-        vec3 reflectDir = reflect(-lightDir, normal);
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
-        return ambient + diff + 0.5 * spec; // Assuming metallic is set to 0.5
+        void main() {
+            vec3 norm = normalize(normal);
+            vec3 lightDir = normalize(lightPos - position);
+            vec3 viewDir = normalize(viewPos - position);
+            vec3 lighting = calculateLighting(norm, lightDir, viewDir);
+            color.rgb = vec3(1.0, 0.8, 0.6) * lighting;
+            color.a = 1.0; // Alpha channel
+        }
     }
 
-    void main() {
-        vec3 norm = normalize(normal);
-        vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0) - position); // Example light position
-        vec3 viewDir = normalize(vec3(0.0, 0.0, 1.0) - position); // Example view position
-        vec3 lighting = calculateLighting(norm, lightDir, viewDir);
-        vec3 color = vec3(1.0, 0.8, 0.6) * lighting;
+    fragment {
+        input vec4 color;
+        output vec4 fragColor;
 
-        fragColor = vec4(color, 1.0);
+        void main() {
+            fragColor = color;
+        }
     }
-}
 }

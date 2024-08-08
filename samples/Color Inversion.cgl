@@ -1,21 +1,25 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    vertex {
+        input vec2 texCoord;
+        output vec2 passTexCoord;
 
-    // Pass through texCoord to the fragment shader
-    void main() {
-        fragTexCoord = texCoord;
+        void main() {
+            passTexCoord = texCoord;
+        }
     }
-}
 
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
+    fragment {
+        input vec2 passTexCoord;
+        output vec4 fragColor;
 
-    void main() {
-        vec4 color = texture(texture, fragTexCoord);
-        fragColor = vec4(vec3(1.0) - color, 1.0);
+        vec4 textureColor(vec2 coord) {
+            // Example function to simulate texture sampling
+            return vec4(coord.x, coord.y, 0.5, 1.0); // Simulated texture color
+        }
+
+        void main() {
+            vec4 color = textureColor(passTexCoord);
+            fragColor = vec4(vec3(1.0) - color.rgb, 1.0);
+        }
     }
-}
 }

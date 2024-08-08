@@ -1,24 +1,36 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragCoord;
+    vertex {
+        input vec2 texCoord;
+        output vec4 color;
 
-    void main() {
-        fragCoord = texCoord;
+        // Pass through the texture coordinate
+        void main() {
+            color = vec4(texCoord, 0.0, 1.0);
+        }
     }
-}
 
-fragment {
-    input vec2 fragCoord;
-    output vec4 fragColor;
+    fragment {
+        input vec4 color; // This contains the texture coordinate
+        // Simulated inputs
+        input vec2 motionDirection;
+        input float blurAmount;
+        input float texture; // Simulated texture
+        output vec4 fragColor;
+
+        vec4 sampleTexture(vec2 coord) {
+            // Simulate texture sampling (for demonstration purposes)
+            return vec4(texture, coord);
+        }
 
         void main() {
-        
-        for (int i = -4; i < 4; i++) {
-            color += texture(texture, fragCoord * motionDirection * blurAmount / 10.0);
+            vec2 texCoord = color.xy; // Extract the texture coordinate
+            vec4 colorAccum = vec4(0.0);
+            for (int i = -4; i <= 4; i=i+1) {
+                vec2 offset = float(i) * motionDirection * blurAmount / 10.0;
+                colorAccum += sampleTexture(texCoord + offset);
+            }
+            colorAccum /= 9.0;
+            fragColor = colorAccum;
         }
-        color /= 9.0;
-        fragColor = color;
     }
-}
 }
