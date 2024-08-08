@@ -1,31 +1,44 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    vertex {
+        input vec2 texCoord;
+        output vec4 fragColor;
 
-    // Pass through texCoord to the fragment shader
-    void main() {
-        fragTexCoord = texCoord;
-    }
-}
+        
 
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
-
-    void main() {
-        vec4 color = texture(texture, fragTexCoord);
-        vec4 north = texture(texture, fragTexCoord + vec2(0.0, outlineWidth));
-        vec4 south = texture(texture, fragTexCoord - vec2(0.0, outlineWidth));
-        vec4 east = texture(texture, fragTexCoord + vec2(outlineWidth, 0.0));
-        vec4 west = texture(texture, fragTexCoord - vec2(outlineWidth, 0.0));
-
-        float edge = length((north + south + east + west) / 4.0 - color);
-        if (edge > 0.1) {
-            fragColor = vec4(0.0, 0.0, 0.0, 1.0);
-        } else {
-            fragColor = color;
+        void main() {
+            // Pass texture coordinates to fragment shader
+            float outlineWidth = 0.01; // Example value for outline width
+            fragColor.xy = texCoord;
+            fragColor.zw = vec2(outlineWidth, 0.0); // Store outline width in the z component for later use
+            gl_Position = vec4(texCoord, 0.0, 1.0); // Example position
         }
     }
-}
+
+    fragment {
+        input vec2 fragTexCoord;
+        input vec2 fragOutlineWidth;
+        output vec4 fragColor;
+
+        // Simulated texture sampling
+        vec4 textureColor(vec2 coord) {
+            // Simulate texture sampling (replace with actual sampling if needed)
+            return vec4(coord, 0.5, 1.0); // Simulated texture color
+        }
+
+        void main() {
+            float outlineWidth = fragOutlineWidth.x; // Extract outline width
+            vec4 color = textureColor(fragTexCoord);
+            vec4 north = textureColor(fragTexCoord + vec2(0.0, outlineWidth));
+            vec4 south = textureColor(fragTexCoord - vec2(0.0, outlineWidth));
+            vec4 east = textureColor(fragTexCoord + vec2(outlineWidth, 0.0));
+            vec4 west = textureColor(fragTexCoord - vec2(outlineWidth, 0.0));
+
+            float edge = length((north + south + east + west) / 4.0 - color);
+            if (edge > 0.1) {
+                fragColor = vec4(0.0, 0.0, 0.0, 1.0);
+            } else {
+                fragColor = color;
+            }
+        }
+    }
 }

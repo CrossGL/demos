@@ -1,22 +1,47 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    vertex {
+        input vec2 texCoord;
+        // Simulated input for time and texture data
+        input float time;
+        input vec4 textureData; // Example for a 512x512 texture
+        input vec2 textureSize; // Size of the texture (width, height)
+        output vec2 texCoordOut;
 
-    // Pass through texCoord to the fragment shader
-    void main() {
-        fragTexCoord = texCoord;
+
+        void main() {
+            texCoordOut = texCoord;
+        }
     }
-}
 
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
+    fragment {
+        input vec2 texCoordOut;
 
-    void main() {
-        vec2 uv = fragTexCoord + sin(fragTexCoord.y * 10.0 + time) * 0.01;
-        vec4 color = texture(texture, uv);
-        fragColor = vec4(color.rgb, 1.0);
+        // Simulated input for time and texture data
+        input float time;
+        input vec4 textureData; // Example for a 512x512 texture
+        input vec2 textureSize; // Size of the texture (width, height)
+        output vec4 fragColor;
+
+        vec4 texture(vec4 texData, vec2 coord, vec2 size) {
+            // Convert coord to texture indices
+            int x = int(coord.x * size.x);
+            int y = int(coord.y * size.y);
+            // Clamp the indices to texture dimensions
+            x = clamp(x, 0, int(size.x) - 1);
+            y = clamp(y, 0, int(size.y) - 1);
+            // Calculate the 1D array index
+            int index = y * int(size.x) + x;
+            // Return the color from the texture data
+            return texData;
+        }
+
+        void main() {
+            vec2 uv = texCoordOut + sin(texCoordOut.y * 10.0 + time) * 0.01;
+
+            // Sample color from texture using the simulated texture function
+            vec4 color = texture(textureData, uv, textureSize);
+
+            fragColor = vec4(color.rgb, 1.0);
+        }
     }
-}
 }

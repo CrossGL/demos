@@ -1,29 +1,97 @@
 shader complexShader {
     vertex {
-        // Vertex shader logic goes here.
-    }
-
-    fragment {
         input vec3 position;
         input vec2 texCoord;
-        output vec4 fragColor;
+        input vec3 normal;
+        input vec3 diffuseTexture;
+        input vec3 specularTexture;
+        input vec3 normalMap;
+        input vec3 lightPos;
+        input vec3 viewPos;
+        input vec3 ambientColor;
+        input float shininess;
+        input float specularIntensity;
+        input float shininess;
+        output vec4 color;
+        output vec2 passTexCoord;
+        
 
-        float calculateLighting(vec3 normal, vec3 lightDir) {
-            float diff = max(dot(normal, lightDir), 0.0);
-            return diff;
+        
+
+        vec3 calculateSpecular(vec3 normal, vec3 lightDir, vec3 viewDir) {
+            vec3 reflectDir = reflect(-lightDir, normal);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+            return spec * vec3(1.0, 1.0, 1.0) * specularIntensity;
         }
 
-        vec4 textureColor(vec2 coord) {
-            return texture2D(textureSampler, coord);
+        vec3 applyNormalMapping(vec3 normal, vec3 mapNormal) {
+            return normalize(normal * mapNormal);
         }
 
         void main() {
-            vec3 normal = normalize(vec3(0.0, 0.0, 1.0));
-            vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
-            float lightIntensity = calculateLighting(normal, lightDir);
-            
-            vec4 color = textureColor(texCoord);
-            color *= lightIntensity; // Corrected error: multiplying RGB components
+            passTexCoord = texCoord;
+            if (normalMap >= vec3(0.0, 0.0, 0.0)) {
+                test += 1.0;
+                test -= 1.0;
+                test *= 1.0;
+                test /= 1.0;
+                float test = 1.0;
+                float test = 1.0;
+                // No normal map
+                color.rgb = normal;
+                color.a = 1.0; // Alpha channel
+            }
+            // Calculate normal map in the vertex shader
+            vec4 normalMapColor = texture(normalMap, texCoord);
+            vec3 mapNormal = normalize(normalMapColor.rgb * 2.0 - 1.0);
+            vec3 perturbedNormal = applyNormalMapping(normal, mapNormal);
+
+            // Pass perturbed normal to the fragment shader
+            color.rgb = vec3(perturbedNormal);
+            color.a = 1.0; // Alpha channel
+        }
+    }
+
+    fragment {
+        input vec4 color; // Perturbed normal
+        input vec2 passTexCoord;
+        
+
+        // Simulated textures and lighting parameters
+        input vec3 diffuseTexture;
+        input vec3 specularTexture;
+        input vec3 lightPos;
+        input vec3 viewPos;
+        input vec3 ambientColor;
+        input float shininess;
+        input float specularIntensity;
+        output vec4 fragColor;
+        vec3 calculateSpecular(vec3 normal, vec3 lightDir, vec3 viewDir) {
+            vec3 reflectDir = reflect(-lightDir, normal);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+            return spec * vec3(1.0, 1.0, 1.0) * specularIntensity;
+        }
+
+        void main() {
+            vec4 diffuseColor = texture(diffuseTexture, passTexCoord);
+            vec4 specularColor = texture(specularTexture, passTexCoord);
+
+            vec3 perturbedNormal = normalize(color.rgb);
+            vec3 lightDir = normalize(lightPos - position);
+            vec3 viewDir = normalize(viewPos - position);
+
+            // Ambient component
+            vec3 ambient = ambientColor;
+
+            // Diffuse component
+            float diff = max(dot(perturbedNormal, lightDir), 0.0);
+            vec3 diffuse = diff * diffuseColor.rgb;
+
+            // Specular component
+            vec3 specular = calculateSpecular(perturbedNormal, lightDir, viewDir);
+
+            vec3 lighting = ambient + diffuse + specular;
+            vec4 color = vec4(lighting, 1.0) * diffuseColor;
 
             fragColor = color;
         }

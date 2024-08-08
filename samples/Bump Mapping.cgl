@@ -1,28 +1,48 @@
 shader main {
-vertex {
-    input vec3 position;
-    input vec3 normal;
-    input vec2 texCoord;
-    output vec3 fragPosition;
-    output vec2 fragTexCoord;
+    vertex {
+        input vec3 position;
+        input vec3 normal;
+        input vec2 texCoord;
+        output vec3 fragPosition;
+        output vec3 fragNormal;
+        output vec2 fragTexCoord;
 
-    void main() {
-        fragPosition = position;
-        fragTexCoord = texCoord;
+        void main() {
+            fragPosition = position;
+            fragNormal = normal;
+            fragTexCoord = texCoord;
+
+            // Set the position of the vertex
+            gl_Position = vec4(position, 1.0);
+        }
     }
-}
 
-fragment {
-    input vec3 fragPosition;
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
+    fragment {
+        input vec3 fragPosition;
+        input vec3 fragNormal;
+        input vec2 fragTexCoord;
+        output vec4 fragColor;
 
-    void main() {
-        vec3 norm = normalize(texture(normalMap, fragTexCoord) * 2.0 - 1.0);
-        vec3 lightDir = normalize(lightPos - fragPosition);
-        float diff = max(dot(norm, lightDir), 0.0);
-        vec3 color = texture(texture, fragTexCoord) * diff;
-        fragColor = vec4(color, 1.0);
+        
+        void main() {
+            // Hardcoded texture and normal map values (you may need to adapt this to your setup)
+            vec3 lightPos = vec3(1.0, 1.0, 1.0);  // Example light position
+            vec3 textureColor = vec3(1.0, 1.0, 1.0); // Example texture color
+            vec3 normalMapColor = vec3(0.5, 0.5, 1.0); // Example normal map color
+            // Fetch and normalize the normal from the normal map
+            vec3 norm = normalize(normalMapColor * 2.0 - 1.0);
+            
+            // Calculate the direction from the fragment to the light
+            vec3 lightDir = normalize(lightPos - fragPosition);
+            
+            // Compute the diffuse lighting term
+            float diff = max(dot(norm, lightDir), 0.0);
+            
+            // Fetch the color from the texture and apply the diffuse lighting
+            vec3 color = textureColor * diff;
+            
+            // Output the final color with full opacity
+            fragColor = vec4(color, 1.0);
+        }
     }
-}
 }

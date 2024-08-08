@@ -1,21 +1,28 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    vertex {
+        input vec2 texCoord;
+        output vec4 color;
 
-    void main() {
-        fragTexCoord = texCoord;
+        void main() {
+            // Pass through texture coordinates as color
+            color = vec4(texCoord, 0.0, 1.0);
+        }
     }
-}
 
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
+    fragment {
+        input vec4 color;
+        output vec4 fragColor;
 
-    void main() {
-        vec4 leftColor = texture(texture, fragTexCoord - eyeOffset);
-        vec4 rightColor = texture(texture, fragTexCoord + eyeOffset);
-        fragColor = vec4(leftColor, rightColor, rightColor, 1.0);
+        // Define a simulated texture sampling function
+        vec4 textureSample(vec2 texCoord) {
+            // Simulated texture sampling: using simple color mapping
+            return vec4(texCoord.x, texCoord.y, 0.5, 1.0); // Sample color with brightness in the red channel
+        }
+
+        void main() {
+            vec4 leftColor = textureSample(color.xy - vec2(0.1)); // Simulate left texture sample
+            vec4 rightColor = textureSample(color.xy + vec2(0.1)); // Simulate right texture sample
+            fragColor = vec4(leftColor.r, rightColor.g, rightColor.b, 1.0);
+        }
     }
-}
 }

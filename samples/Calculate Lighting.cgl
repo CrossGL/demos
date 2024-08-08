@@ -2,63 +2,40 @@ shader complexShader {
     vertex {
         input vec3 position;
         input vec2 texCoord;
-        input vec3 normal;
-        output vec2 fragTexCoord;
-        output vec3 fragPosition;
-        output vec3 fragNormal;
+        output vec4 color;
+
+
+        float calculateLighting(vec3 normal, vec3 lightDir) {
+            float diff = max(dot(normal, lightDir), 0.0);
+            return diff;
+        }
+
+        vec4 textureColor(vec2 coord) {
+            // Hardcoded texture sampling (replace with actual sampling if needed)
+            return vec4(coord, 0.5, 1.0); // Simulated texture color
+        }
 
         void main() {
-            fragTexCoord = texCoord;
-            fragPosition = position;
-            fragNormal = normal;
-            gl_Position = vec4(position, 1.0);
+            // Hardcoded values for lighting and texture operations
+            vec3 hardcodedNormal = vec3(0.0, 0.0, 1.0);
+            vec3 hardcodedLightDir = vec3(1.0, 1.0, 1.0);
+            vec3 normal = hardcodedNormal;
+            vec3 lightDir = hardcodedLightDir;
+            float lightIntensity = calculateLighting(normal, lightDir);
+
+            vec4 texColor = textureColor(texCoord);
+            color = texColor * lightIntensity; // Apply lighting to color
+
+            // Pass texture coordinates to fragment shader
+            color.xy = texCoord;
         }
     }
 
     fragment {
-        input vec2 fragTexCoord;
-        input vec3 fragPosition;
-        input vec3 fragNormal;
+        input vec4 color;
         output vec4 fragColor;
 
-
-        vec3 calculateSpecular(vec3 normal, vec3 lightDir, vec3 viewDir) {
-            vec3 reflectDir = reflect(-lightDir, normal);
-            float spec = pow(max(dot(viewDir, reflectDir), 0.0), defaultShininess);
-            return spec * vec3(1.0, 1.0, 1.0) * defaultSpecularIntensity;
-        }
-
-        vec3 applyNormalMapping(vec3 normal, vec3 mapNormal) {
-            return normalize(normal * mapNormal);
-        }
-
         void main() {
-
-            vec3 mapNormal = normalize(normalMapColor.rgb * 2.0 - 1.0);
-            vec3 perturbedNormal = applyNormalMapping(fragNormal, mapNormal);
-
-            vec3 lightDir = normalize(defaultLightPos - fragPosition);
-            vec3 viewDir = normalize(defaultViewPos - fragPosition);
-
-            // Ambient component
-            vec3 ambient = defaultAmbientColor;
-
-            // Diffuse component
-            float diff = max(dot(perturbedNormal, lightDir), 0.0);
-            vec3 diffuse = diff * diffuseColor.rgb;
-
-            // Specular component
-            vec3 specular = calculateSpecular(perturbedNormal, lightDir, viewDir);
-
-            // Loop to modify lighting based on iterations
-            vec3 lighting = ambient + diffuse + specular;
-            for (int i = 0; i < iterations; i++) {
-                lighting *= 0.9;
-            }
-
-            // Ternary operator to conditionally modify color
-            vec4 color = (diff > 0.5) ? vec4(lighting, 1.0) * diffuseColor : vec4(lighting * 0.5, 1.0) * diffuseColor;
-
             fragColor = color;
         }
     }
