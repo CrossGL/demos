@@ -1,31 +1,46 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    struct VSInput {
+        float2 texCoord @TEXCOORD0;
+    };
 
-    // Pass through texCoord to the fragment shader
-    void main() {
-        fragTexCoord = texCoord;
-    }
-}
+    struct VSOutput {
+        float4 gl_Position @SV_POSITION;
+        float2 fragTexCoord @TEXCOORD0;
+    };
 
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
+    struct PSInput {
+        float2 fragTexCoord @TEXCOORD0;
+    };
 
-    void main() {
-        vec4 color = texture(texture, fragTexCoord);
-        vec4 north = texture(texture, fragTexCoord + vec2(0.0, outlineWidth));
-        vec4 south = texture(texture, fragTexCoord - vec2(0.0, outlineWidth));
-        vec4 east = texture(texture, fragTexCoord + vec2(outlineWidth, 0.0));
-        vec4 west = texture(texture, fragTexCoord - vec2(outlineWidth, 0.0));
-
-        float edge = length((north + south + east + west) / 4.0 - color);
-        if (edge > 0.1) {
-            fragColor = vec4(0.0, 0.0, 0.0, 1.0);
-        } else {
-            fragColor = color;
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.fragTexCoord = input.texCoord;
+            output.gl_Position = float4(0.0, 0.0, 0.0, 1.0); // Placeholder for position
+            return output;
         }
     }
-}
+
+    fragment {
+        float4 main(PSInput input) @SV_TARGET {
+            sampler2D texture;
+            float outlineWidth;
+            float4 fragColor;
+
+            float2 texCoord = input.fragTexCoord;
+            float4 color = tex2D(texture, texCoord);
+            float4 north = tex2D(texture, texCoord + float2(0.0, outlineWidth));
+            float4 south = tex2D(texture, texCoord - float2(0.0, outlineWidth));
+            float4 east = tex2D(texture, texCoord + float2(outlineWidth, 0.0));
+            float4 west = tex2D(texture, texCoord - float2(outlineWidth, 0.0));
+
+            float edge = length((north + south + east + west) / 4.0 - color);
+            if (edge > 0.1) {
+                fragColor = float4(0.0, 0.0, 0.0, 1.0);
+            } else {
+                fragColor = color;
+            }
+            return fragColor;
+        }
+    }
 }

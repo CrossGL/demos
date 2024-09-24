@@ -1,24 +1,41 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragCoord;
+    struct VSInput {
+        float2 texCoord @TEXCOORD0;
+    };
 
-    // Pass through the texture coordinates to the fragment shader
-    void main() {
-        fragCoord = texCoord;
+    struct VSOutput {
+        float4 color @COLOR;
+        float4 gl_Position @SV_POSITION;
+    };
+
+    struct PSInput {
+        float4 color @COLOR;
+    };
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.color = float4(input.texCoord, 0.0, 1.0);
+            output.gl_Position = float4(0.0, 0.0, 0.0, 1.0); // Placeholder for position
+            return output;
+        }
     }
-}
 
-fragment {
-    input vec2 fragCoord;
-    output vec4 fragColor;
+    fragment {
+        float4 main(PSInput input) @SV_TARGET {
+            sampler2D texture;
+            float aberration;
+            float4 fragColor;
 
-    void main() {
-        vec2 offset = vec2(aberration / 512.0);
-        vec4 red = texture(texture, fragCoord + offset);
-        vec4 green = texture(texture, fragCoord);
-        vec4 blue = texture(texture, fragCoord - offset);
-        fragColor = vec4(red.r, green.g, blue.b, 1.0);
+            float2 texCoord = input.color.xy; // Extract the texture coordinate
+
+            float2 offset = float2(aberration / 512.0);
+            float4 red = tex2D(texture, texCoord + offset);
+            float4 green = tex2D(texture, texCoord);
+            float4 blue = tex2D(texture, texCoord - offset);
+
+            fragColor = float4(red.r, green.g, blue.b, 1.0);
+            return fragColor;
+        }
     }
-}
 }

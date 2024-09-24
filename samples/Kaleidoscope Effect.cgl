@@ -1,24 +1,48 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    struct VSInput {
+        float2 texCoord @TEXCOORD0;
+    };
 
-    void main() {
-        fragTexCoord = texCoord;
+    struct VSOutput {
+        float2 texCoord @TEXCOORD0;
+    };
+
+    struct PSInput {
+        float2 texCoord @TEXCOORD0;
+    };
+
+    uniform sampler2D texture;
+    uniform float segments;
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.texCoord = input.texCoord;
+            return output;
+        }
     }
-}
 
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
+    fragment {
+        float4 main(PSInput input) @SV_TARGET {
+            float2 texCoord = input.texCoord;
 
-    void main() {
-        float angle = atan(fragTexCoord.y - 0.5, fragTexCoord.x - 0.5);
-        float radius = length(fragTexCoord - vec2(0.5));
-        float segment = floor(segments * angle / (2.0 * 3.14159265));
-        float newAngle = segment * 2.0 * 3.14159265 / segments;
-        vec2 newTexCoord = vec2(0.5) + radius * vec2(cos(newAngle), sin(newAngle));
-        fragColor = texture(texture, newTexCoord);
+            // Compute the angle of the current texCoord relative to the center
+            float angle = atan2(texCoord.y - 0.5, texCoord.x - 0.5);
+            
+            // Compute the radius from the center of the texture
+            float radius = length(texCoord - float2(0.5, 0.5));
+            
+            // Determine the segment index based on the angle and number of segments
+            float segment = floor(segments * angle / (2.0 * 3.14159265));
+            
+            // Compute the new angle corresponding to the segment
+            float newAngle = segment * 2.0 * 3.14159265 / segments;
+            
+            // Compute the new texture coordinates based on the new angle
+            float2 newTexCoord = float2(0.5, 0.5) + radius * float2(cos(newAngle), sin(newAngle));
+            
+            // Sample the texture at the new texture coordinates
+            return texture.Sample(texture, newTexCoord);
+        }
     }
-}
 }

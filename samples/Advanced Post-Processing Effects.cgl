@@ -1,17 +1,37 @@
 shader main {
+
+    struct VSInput {
+        float2 texCoord @TEXCOORD0;
+    };
+
+    struct VSOutput {
+        float4 color @COLOR;
+    };
+
+    uniform sampler2D iChannel0;
+
     vertex {
-        // Vertex shader logic goes here.
+        VSOutput main(VSInput input) {
+            VSOutput output;
+
+            // Pass through texture coordinates as color
+            output.color = float4(input.texCoord, 0.0, 1.0);
+
+            return output;
+        }
     }
 
     fragment {
-        input vec2 texCoord;
-        output vec4 fragColor;
-
-        void main() {
-            float brightness = 0.0; // Placeholder for brightness calculation
+        float4 main(VSOutput input) @SV_TARGET {
+            // Sample brightness and calculate bloom
+            float brightness = texture(iChannel0, input.color.xy).r;
             float bloom = max(0.0, brightness - 0.5);
-            vec3 color = vec3(0.0); // Placeholder for texture color
-            fragColor = vec4(color + vec3(bloom), 1.0);
+
+            // Apply bloom to the texture color
+            float3 texColor = texture(iChannel0, input.color.xy).rgb;
+            float3 colorWithBloom = texColor + float3(bloom);
+
+            return float4(colorWithBloom, 1.0);
         }
     }
 }

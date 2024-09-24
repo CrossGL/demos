@@ -1,23 +1,45 @@
 shader main {
-vertex {
-    input vec3 position;
-    input vec3 normal;
-    output vec4 fragColor;
+    struct VSInput {
+        float3 position @POSITION;
+        float3 normal @NORMAL;
+    };
 
-    // Vertex shader code, if needed
-    // For this example, there's no actual vertex shader code
-}
+    struct VSOutput {
+        float4 color @COLOR;
+        float4 gl_Position @SV_POSITION;
+    };
 
-fragment {
-    input vec3 position;
-    input vec3 normal;
-    output vec4 fragColor;
+    struct PSInput {
+        float4 color @COLOR;
+    };
 
-        void main() {
-        vec3 norm = normalize(normal);
-        vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0) - position); // Example light position
-        
-        fragColor = vec4(color, 1.0);
+    vertex {
+        float3 celShading(float3 normal, float3 lightDir) {
+            float intensity = dot(normal, lightDir);
+            if (intensity > 0.95) return float3(1.0, 1.0, 1.0);
+            else if (intensity > 0.5) return float3(0.8, 0.8, 0.8);
+            else if (intensity > 0.25) return float3(0.6, 0.6, 0.6);
+            else return float3(0.4, 0.4, 0.4);
+        }
+
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            float3 norm = normalize(input.normal);
+            float3 lightDir = normalize(lightPos - input.position);
+            float3 color = celShading(norm, lightDir);
+
+            output.color.rgb = color;
+            output.color.a = 1.0; // Alpha channel
+            output.gl_Position = float4(input.position, 1.0);
+            return output;
+        }
     }
-}
+
+    fragment {
+        float4 main(PSInput input) @SV_TARGET {
+            float4 fragColor;
+            fragColor = input.color;
+            return fragColor;
+        }
+    }
 }

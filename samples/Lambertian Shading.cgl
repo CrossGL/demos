@@ -1,28 +1,37 @@
 shader main {
-vertex {
-    input vec3 position;
-    input vec3 normal;
-    output vec3 fragPosition;
-    output vec3 fragNormal;
+    struct VSInput {
+        float3 position @POSITION;
+        float3 normal @NORMAL;
+    };
 
-    void main() {
-        fragPosition = position;
-        fragNormal = normal;
+    struct VSOutput {
+        float3 position @POSITION;
+        float3 normal @NORMAL;
+    };
+
+    struct PSInput {
+        float3 position @POSITION;
+        float3 normal @NORMAL;
+    };
+
+    uniform float3 lightPos;
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.position = input.position;
+            output.normal = input.normal;
+            return output;
+        }
     }
-}
 
-fragment {
-    input vec3 fragPosition;
-    input vec3 fragNormal;
-    output vec4 fragColor;
-
-    void main() {
-        vec3 norm = normalize(fragNormal);
-        vec3 lightPos = vec3(1.0, 1.0, 1.0);  // Hardcoded light position
-        vec3 lightDir = normalize(lightPos - fragPosition);
-        float diff = max(dot(norm, lightDir), 0.0);
-        vec3 color = vec3(0.5, 0.5, 0.5) * diff;
-        fragColor = vec4(color, 1.0);
+    fragment {
+        float4 main(PSInput input) @SV_TARGET {
+            float3 norm = normalize(input.normal);
+            float3 lightDir = normalize(lightPos - input.position);
+            float diff = max(dot(norm, lightDir), 0.0);
+            float3 color = float3(0.5, 0.5, 0.5) * diff;
+            return float4(color, 1.0);
+        }
     }
-}
 }

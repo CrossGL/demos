@@ -1,24 +1,33 @@
 shader main {
-vertex {
-    input vec3 position;
-    input vec3 normal;
-    output vec3 fragNormal;
+    struct VSInput {
+        float3 position @POSITION;
+        float3 normal @NORMAL;
+    };
 
-    void main() {
-        fragNormal = normal;
+    struct VSOutput {
+        float4 gl_Position @SV_POSITION;
+        float3 fragNormal @NORMAL;
+    };
+
+    struct PSInput {
+        float3 fragNormal @NORMAL;
+    };
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.fragNormal = input.normal;
+            output.gl_Position = float4(input.position, 1.0);
+            return output;
+        }
     }
-}
 
-fragment {
-    input vec3 fragNormal;
-    output vec4 fragColor;
-
-    void main() {
-        // Base color
-        vec3 baseColor = vec3(0.5, 0.5, 0.5);
-        // Adjust color based on normal
-        vec3 color = baseColor + 0.5 * fragNormal;
-        fragColor = vec4(color, 1.0);
+    fragment {
+        float4 main(PSInput input) @SV_TARGET {
+            float4 fragColor;
+            float3 color = float3(0.5, 0.5, 0.5) + 0.5 * input.fragNormal;
+            fragColor = float4(color, 1.0);
+            return fragColor;
+        }
     }
-}
 }

@@ -1,19 +1,32 @@
 shader main {
+    struct VSInput {
+        float2 texCoord @TEXCOORD0;
+    };
+
+    struct VSOutput {
+        float4 color @COLOR;
+    };
+
+    struct PSInput {
+        float4 color @COLOR;
+    };
+
     vertex {
-        // Vertex shader logic goes here.
+        float marblePattern(float2 uv) {
+            return 0.5 + 0.5 * sin(10.0 * uv.x + iTime);
+        }
+
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            float3 colorComputed = float3(marblePattern(input.texCoord), 0.0, 0.0);
+            output.color = float4(colorComputed, 1.0);
+            return output;
+        }
     }
 
     fragment {
-        input vec2 texCoord;
-        output vec4 fragColor;
-
-        float marblePattern(vec2 uv) {
-            return 0.5 + 0.5 * sin(10.0 * uv.x);
-        }
-
-        void main() {
-            vec3 color = vec3(marblePattern(texCoord), 0.0, 0.0);
-            fragColor = vec4(color, 1.0);
+        float4 main(PSInput input) @SV_TARGET {
+            return input.color;
         }
     }
 }

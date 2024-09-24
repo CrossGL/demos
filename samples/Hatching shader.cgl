@@ -1,36 +1,45 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    struct VSInput {
+        float2 texCoord @TEXCOORD0;
+    };
 
-    void main() {
-        fragTexCoord = texCoord;
+    struct VSOutput {
+        float4 gl_Position @SV_POSITION;
+        float2 fragTexCoord @TEXCOORD0;
+    };
+
+    struct PSInput {
+        float2 fragTexCoord @TEXCOORD0;
+    };
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.fragTexCoord = input.texCoord;
+            output.gl_Position = float4(0.0, 0.0, 0.0, 1.0); // Placeholder for position
+            return output;
+        }
     }
-}
 
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
+    fragment {
+        float4 main(PSInput input) @SV_TARGET {
+            sampler2D texture;
+            float threshold1;
+            float threshold2;
+            float threshold3;
+            float4 fragColor;
 
-    void main() {
-        vec4 color = texture(texture, fragTexCoord);
-        float itensity = dot(color, vec3(0.299, 0.587, 0.114));
+            float4 color = tex2D(texture, input.fragTexCoord);
+            float intensity = dot(color.rgb, float3(0.299, 0.587, 0.114));
 
-        vec3 hatching = vec3(1.0);
-        if (itensity < threshold1) {
-                hatching = vec3(0.8);
-                }
-        if (itensity < threshold2) {
-        hatching = vec3(0.6);
+            float3 hatching = float3(1.0);
+            if (intensity < threshold1) hatching = float3(0.8);
+            else if (intensity < threshold2) hatching = float3(0.6);
+            else if (intensity < threshold3) hatching = float3(0.4);
+            else hatching = float3(0.2);
+
+            fragColor = float4(hatching, 1.0);
+            return fragColor;
         }
-        if (itensity < threshold3) {
-        hatching = vec3(0.4);
-        }
-        else {
-        hatching = vec3(0.2);
-        }
-
-        fragColor = vec4(hatching, 1.0);
     }
-}
 }

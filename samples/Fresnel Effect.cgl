@@ -1,28 +1,44 @@
 shader main {
-vertex {
-    input vec3 position;
-    input vec3 normal;
-    output vec4 fragColor;
+    struct VSInput {
+        float3 position @POSITION;
+        float3 normal @NORMAL;
+    };
 
-    // Vertex shader code, if needed
-    // For this example, there's no actual vertex shader code
-}
+    struct VSOutput {
+        float4 color @COLOR;
+        float4 gl_Position @SV_POSITION;
+    };
 
-fragment {
-    input vec3 normal;
-    output vec4 fragColor;
+    struct PSInput {
+        float4 color @COLOR;
+    };
 
-    float fresnelEffect(vec3 normal, vec3 viewDir) {
-        return pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0);
+    vertex {
+        float fresnelEffect(float3 normal, float3 viewDir) {
+            return pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0);
+        }
+
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            // Pass the normalized normal and view direction to the fragment shader
+            output.color.rgb = input.normal;
+            output.color.a = 1.0; // Alpha channel
+            output.gl_Position = float4(input.position, 1.0);
+            return output;
+        }
     }
 
-    void main() {
-        vec3 norm = normalize(normal);
-        vec3 viewDir = vec3(0.0, 0.0, 1.0); // Example view direction
-        float fresnel = fresnelEffect(norm, normalize(viewDir));
-        vec3 color = vec3(0.1, 0.5, 1.0) * fresnel;
+    fragment {
+        float4 main(PSInput input) @SV_TARGET {
+            float3 viewDir;
+            float4 fragColor;
 
-        fragColor = vec4(color, 1.0);
+            float3 norm = normalize(input.color.rgb);
+            float fresnel = fresnelEffect(norm, normalize(viewDir));
+            float3 color = float3(0.1, 0.5, 1.0) * fresnel;
+
+            fragColor = float4(color, 1.0);
+            return fragColor;
+        }
     }
-}
 }

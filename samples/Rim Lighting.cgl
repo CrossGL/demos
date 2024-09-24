@@ -1,27 +1,38 @@
 shader main {
-vertex {
-    input vec3 position;
-    input vec3 normal;
-    output vec3 fragPosition;
-    output vec3 fragNormal;
+    struct VSInput {
+        float3 position @POSITION;
+        float3 normal @NORMAL;
+    };
 
-    // Pass through position and normal to the fragment shader
-    void main() {
-        fragPosition = position;
-        fragNormal = normal;
+    struct VSOutput {
+        float3 position @POSITION;
+        float3 normal @NORMAL;
+    };
+
+    struct PSInput {
+        float3 position @POSITION;
+        float3 normal @NORMAL;
+    };
+
+    uniform float3 viewPos;
+    uniform float3 rimColor;
+    uniform float rimPower;
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.position = input.position;
+            output.normal = input.normal;
+            return output;
+        }
     }
-}
 
-fragment {
-    input vec3 fragPosition;
-    input vec3 fragNormal;
-    output vec4 fragColor;
-
-    void main() {
-        vec3 viewDir = normalize(viewPos - fragPosition);
-        float rim = pow(1.0 - max(dot(fragNormal, viewDir), 0.0), rimPower);
-        vec3 color = vec3(0.5, 0.5, 0.5) + rim * rimColor;
-        fragColor = vec4(color, 1.0);
+    fragment {
+        float4 main(PSInput input) @SV_TARGET {
+            float3 viewDir = normalize(viewPos - input.position);
+            float rim = pow(1.0 - max(dot(input.normal, viewDir), 0.0), rimPower);
+            float3 color = float3(0.5, 0.5, 0.5) + rim * rimColor;
+            return float4(color, 1.0);
+        }
     }
-}
 }

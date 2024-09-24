@@ -1,27 +1,36 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    struct VSInput {
+        float2 texCoord @TEXCOORD0;
+    };
 
-    void main() {
-        fragTexCoord = texCoord;
-    }
-}
+    struct VSOutput {
+        float2 texCoord @TEXCOORD0;
+    };
 
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
+    struct PSInput {
+        float2 texCoord @TEXCOORD0;
+    };
 
-    void main() {
-        vec2 uv = fragTexCoord * 2.0 - 1.0;
-        float len = length(uv);
-        if (len < 1.0) {
-            uv = uv * (1.0 + strength * len * len);
+    uniform sampler2D texture;
+    uniform float strength;
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.texCoord = input.texCoord;
+            return output;
         }
-        uv = uv * 0.5 + 0.5;
-        fragColor = texture(texture, uv);
     }
-}
-}
-}
+
+    fragment {
+        float4 main(PSInput input) @SV_TARGET {
+            float2 uv = input.texCoord * 2.0 - 1.0; // Convert texCoord from [0, 1] to [-1, 1] range
+            float len = length(uv); // Compute the distance from the center
+            if (len < 1.0) {
+                uv = uv * (1.0 + strength * len * len); // Apply distortion based on distance
+            }
+            uv = uv * 0.5 + 0.5; // Convert back to [0, 1] range
+            return texture.Sample(texture, uv); // Sample the texture at the distorted coordinates
+        }
+    }
 }

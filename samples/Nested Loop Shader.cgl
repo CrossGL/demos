@@ -1,36 +1,76 @@
 shader nestedLoopsShader {
-    vertex {
-        input vec3 position;
-        input vec2 texCoord;
-        input vec3 normal;
-        output vec3 fragPosition;
-        output vec2 fragTexCoord;
-        output vec3 fragNormal;
+    struct VSInput {
+        float3 position @POSITION;
+        float2 texCoord @TEXCOORD0;
+        float3 normal @NORMAL;
+    };
 
-        void main() {
-            fragPosition = position;
-            fragTexCoord = texCoord;
-            fragNormal = normal;
+    struct VSOutput {
+        float4 color @COLOR;
+    };
+
+    struct PSInput {
+        float4 color @COLOR;
+    };
+
+    uniform sampler2D texture;
+    uniform float3 lightPos;
+    uniform float3 viewPos;
+    uniform float3 ambientColor;
+    uniform float shininess;
+    uniform float specularIntensity;
+    uniform int outerIterations;
+    uniform int innerIterations;
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+
+            // Pass texture coordinates and normals to the fragment shader
+            output.color.xy = input.texCoord;
+            output.color.zw = input.normal;
+
+            // Pass other uniforms directly
+            output.color.a = 1.0; // Alpha channel
+
+            return output;
         }
     }
 
     fragment {
-        input vec3 fragPosition;
-        input vec2 fragTexCoord;
-        input vec3 fragNormal;
-        output vec4 fragColor;
+        float4 main(PSInput input) @SV_TARGET {
+            float2 texCoord = input.color.xy; // Extract the texture coordinate
+            float3 normal = input.color.zw; // Extract the normal
 
-        void main() {
-            
-            for (int i = 0; i < 0; i++) { 
-                for (int j = 0; j < 0; j++) { 
-                    vec3 reflectDir = reflect(-lightDir, fragNormal);
-                   }
+            vec4 texColor = texture.Sample(texture, texCoord);
+            float3 lightDir = normalize(lightPos - float3(texCoord, 0.0));
+            float3 viewDir = normalize(viewPos - float3(texCoord, 0.0));
+
+            float3 ambient = ambientColor;
+            float3 diffuse = texColor.rgb;
+            float3 specular = float3(0.0);
+
+            // Outer loop
+            for (int i = 0; i < outerIterations; i++) {
+                // Inner loop
+                for (int j = 0; j < innerIterations; j++) {
+                    // Compute lighting
+                    float3 tempSpecular = calculateSpecular(normal, lightDir, viewDir);
+                    specular += tempSpecular;
+                }
+
+                // Reduce diffuse intensity progressively
                 diffuse *= 0.9;
             }
 
-            vec3 lighting = ambient + diffuse + specular;
-            fragColor = vec4(lighting, 1.0);
+            float3 lighting = ambient + diffuse + specular;
+            return float4(lighting, 1.0);
+        }
+
+        float3 calculateSpecular(float3 normal, float3 lightDir, float3 viewDir) {
+            float3 reflectDir = reflect(-lightDir, normal);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+            return spec * float3(1.0, 1.0, 1.0) * specularIntensity;
         }
     }
 }

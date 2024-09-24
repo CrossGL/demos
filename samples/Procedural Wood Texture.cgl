@@ -1,24 +1,35 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    struct VSInput {
+        float2 texCoord @TEXCOORD0;
+    };
 
-    void main() {
-        fragTexCoord = texCoord;
+    struct VSOutput {
+        float2 texCoord @TEXCOORD0;
+    };
+
+    struct PSInput {
+        float2 texCoord @TEXCOORD0;
+    };
+
+    uniform float scale;
+    uniform float rings;
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.texCoord = input.texCoord;
+            return output;
+        }
     }
-}
 
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
-
-    void main() {
-        vec2 uv = fragTexCoord * scale;
-        float dist = length(uv - vec2(0.5));
-        float wood = rings * dist;
-        wood = wood - floor(wood);
-        vec3 color = vec3(0.2, 0.1, 0.0) + vec3(0.4, 0.2, 0.1) * wood;
-        fragColor = vec4(color, 1.0);
+    fragment {
+        float4 main(PSInput input) @SV_TARGET {
+            float2 uv = input.texCoord * scale;
+            float dist = length(uv - float2(0.5, 0.5));
+            float wood = rings * dist;
+            wood = wood - floor(wood);
+            float3 color = float3(0.2, 0.1, 0.0) + float3(0.4, 0.2, 0.1) * wood;
+            return float4(color, 1.0);
+        }
     }
-}
 }

@@ -1,24 +1,38 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragCoord;
+    struct VSInput {
+        float2 texCoord @TEXCOORD0;
+    };
 
-    void main() {
-        fragCoord = texCoord;
-    }
-}
+    struct VSOutput {
+        float4 color @COLOR;
+    };
 
-fragment {
-    input vec2 fragCoord;
-    output vec4 fragColor;
+    struct PSInput {
+        float4 color @COLOR;
+    };
 
-        void main() {
-        
-        for (int i = -4; i < 4; i++) {
-            color += texture(texture, fragCoord * motionDirection * blurAmount / 10.0);
+    uniform sampler2D texture;
+    uniform float2 motionDirection;
+    uniform float blurAmount;
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            // Pass through the texture coordinate
+            output.color = float4(input.texCoord, 0.0, 1.0);
+            return output;
         }
-        color /= 9.0;
-        fragColor = color;
     }
-}
+
+    fragment {
+        float4 main(PSInput input) @SV_TARGET {
+            float2 texCoord = input.color.xy; // Extract the texture coordinate
+            float4 colorAccum = float4(0.0);
+            for (int i = -4; i <= 4; i++) {
+                colorAccum += texture.Sample(texture, texCoord + float(i) * motionDirection * blurAmount / 10.0);
+            }
+            colorAccum /= 9.0;
+            return colorAccum;
+        }
+    }
 }

@@ -1,21 +1,34 @@
 shader main {
+    struct VSInput {
+        float3 position @POSITION;
+    };
+
+    struct VSOutput {
+        float4 color @COLOR;
+    };
+
+    struct PSInput {
+        float4 color @COLOR;
+    };
+
     vertex {
-        // Vertex shader logic goes here.
+        float waveFunction(float2 p) {
+            return sin(p.x * 10.0 + iTime) * 0.1;
+        }
+
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            float2 uv = input.position.xy;
+            float wave = waveFunction(uv);
+            float3 waterColor = float3(0.0, 0.3, 0.8) * (1.0 - wave);
+            output.color = float4(waterColor, 1.0);
+            return output;
+        }
     }
 
     fragment {
-        input vec3 position;
-        output vec4 fragColor;
-
-        float waveFunction(vec2 p) {
-            return sin(p.x * 10.0) * 0.1;
-        }
-
-        void main() {
-            vec2 uv = position.xy;
-            float wave = waveFunction(uv);
-            vec3 waterColor = vec3(0.0, 0.3, 0.8) * (1.0 - wave);
-            fragColor = vec4(waterColor, 1.0);
+        float4 main(PSInput input) @SV_TARGET {
+            return input.color;
         }
     }
 }
