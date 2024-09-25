@@ -1,31 +1,84 @@
 shader complexShader {
+    struct VSInput {
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
+        vec3 normal @NORMAL;
+    };
+
+    struct VSOutput {
+        vec4 color @COLOR;
+        vec4 gl_Position @SV_POSITION;
+    };
+
+    struct PSInput {
+        vec4 color @COLOR;
+        vec2 texCoord @TEXCOORD0;
+    };
+
     vertex {
-        // Vertex shader logic goes here.
+        vec3 calculateSpecular(vec3 normal, vec3 lightDir, vec3 viewDir) {
+            vec3 reflectDir = reflect(-lightDir, normal);
+            vec2 spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+            return spec * vec3(1.0, 1.0, 1.0) * specularIntensity;
+        }
+
+        vec3 applyNormalMapping(vec3 normal, vec3 mapNormal) {
+            return normalize(normal * mapNormal);
+        }
+
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            // Pass texture coordinates and normals to the fragment shader
+            output.color.xy = input.texCoord;
+            output.color.zw = input.normal;
+
+            // Calculate normal map in the vertex shader
+            vec4 normalMapColor = tex2D(normalMap, input.texCoord);
+            vec3 mapNormal = normalize(normalMapColor.rgb * 2.0 - 1.0);
+            vec3 perturbedNormal = applyNormalMapping(input.normal, mapNormal);
+
+            // Pass perturbed normal to the fragment shader
+            output.color.rgb = perturbedNormal;
+            output.color.a = 1.0; // Alpha channel
+            output.gl_Position = vec4(input.position, 1.0);
+            return output;
+        }
     }
 
     fragment {
-        input vec3 position;
-        input vec2 texCoord;
-        output vec4 fragColor;
+        vec4 main(PSInput input) @SV_TARGET {
+            sampler2D diffuseTexture;
+            sampler2D specularTexture;
+            sampler2D normalMap;
+            vec3 lightPos;
+            vec3 viewPos;
+            vec3 ambientColor;
+            vec2 shininess;
+            vec2 specularIntensity;
+            vec4 fragColor;
 
-        float calculateLighting(vec3 normal, vec3 lightDir) {
-            float diff = max(dot(normal, lightDir), 0.0);
-            return diff;
-        }
+            vec4 diffuseColor = tex2D(diffuseTexture, input.texCoord);
+            vec4 specularColor = tex2D(specularTexture, input.texCoord);
 
-        vec4 textureColor(vec2 coord) {
-            return texture2D(textureSampler, coord);
-        }
+            vec3 perturbedNormal = normalize(input.color.rgb);
+            vec3 lightDir = normalize(lightPos - input.color.xyz);
+            vec3 viewDir = normalize(viewPos - input.color.xyz);
 
-        void main() {
-            vec3 normal = normalize(vec3(0.0, 0.0, 1.0));
-            vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
-            float lightIntensity = calculateLighting(normal, lightDir);
-            
-            vec4 color = textureColor(texCoord);
-            color *= lightIntensity; // Corrected error: multiplying RGB components
+            // Ambient component
+            vec3 ambient = ambientColor;
+
+            // Diffuse component
+            vec2 diff = max(dot(perturbedNormal, lightDir), 0.0);
+            vec3 diffuse = diff * diffuseColor.rgb;
+
+            // Specular component
+            vec3 specular = calculateSpecular(perturbedNormal, lightDir, viewDir);
+
+            vec3 lighting = ambient + diffuse + specular;
+            vec4 color = vec4(lighting, 1.0) * diffuseColor;
 
             fragColor = color;
+            return fragColor;
         }
     }
 }

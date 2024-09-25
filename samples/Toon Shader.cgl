@@ -1,29 +1,43 @@
-26. Toon Shader
 shader main {
-vertex {
-    input vec3 position;
-    input vec3 normal;
-    output vec3 fragPosition;
-    output vec3 fragNormal;
+    struct VSInput {
+        vec3 position @POSITION;
+        vec3 normal @NORMAL; // Semantic for normal input
+    };
 
-    // Pass through position and normal to the fragment shader
-    void main() {
-        fragPosition = position;
-        fragNormal = normal;
-    }
+    struct VSOutput {
+        vec3 positionOut @POSITION;
+        vec4 color @COLOR; // Output color
+    };
+
+    struct PSInput {
+        vec4 color @COLOR; // Input color for the fragment shader
+    };
+
+    cbuffer ShaderUniforms { 
+    vec3 lightPos; 
+    vec3 colorLevels; 
 }
 
-fragment {
-    input vec3 fragPosition;
-    input vec3 fragNormal;
-    output vec4 fragColor;
 
-    void main() {
-        vec3 norm = normalize(fragNormal);
-        vec3 lightDir = normalize(lightPos - fragPosition);
-        float itensity = dot(norm, lightDir);
-        vec3 color = vec3(step(colorLevels.x, itensity), step(colorLevels.y, itensity), step(colorLevels.z, itensity));
-        fragColor = vec4(color, 1.0);
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.color = vec4(input.position, 1.0); // Assign position to color
+            // Note: The normal value should also be passed if needed for lighting calculations
+            return output;
+        }
     }
-}
+
+    fragment {
+        vec4 main(PSInput input) @SV_TARGET {
+            vec3 position = input.color.xyz; // Extract the position
+            vec3 normal = input.color.wyz;   // Extract the normal (assuming w holds a component of normal)
+
+            vec3 norm = normalize(normal);
+            vec3 lightDir = normalize(lightPos - position);
+            vec2 intensity = dot(norm, lightDir);
+            vec3 fragColorValue = vec3(step(colorLevels, intensity));
+            return vec4(fragColorValue, 1.0);
+        }
+    }
 }

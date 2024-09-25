@@ -1,28 +1,45 @@
 shader main {
-    vertex {
-        input vec3 position;
-        input vec3 normal;
-        output vec3 fragPosition;
-        output vec3 fragNormal;
+    struct VSInput {
+        vec3 position @POSITION;
+        vec3 normal @NORMAL;
+    };
 
-        void main() {
-            fragPosition = position;
-            fragNormal = normal;
-            gl_Position = vec4(position, 1.0);
+    struct VSOutput {
+        vec3 fragPosition @POSITION;
+        vec3 fragNormal @NORMAL;
+        vec4 gl_Position @SV_POSITION;
+    };
+
+    struct PSInput {
+        vec3 fragPosition @POSITION;
+        vec3 fragNormal @NORMAL;
+    };
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.fragPosition = input.position;
+            output.fragNormal = input.normal;
+            output.gl_Position = vec4(input.position, 1.0);
+            return output;
         }
     }
 
     fragment {
-        input vec3 fragPosition;
-        input vec3 fragNormal;
-        output vec4 fragColor;
+        vec4 main(PSInput input) @SV_TARGET {
+            sampler2D texture;
+            samplerCube environmentMap;
+            vec3 viewPos;
+            vec4 fragColor;
 
-        void main() {
-            vec3 norm = normalize(fragNormal);
-            vec3 viewDir = normalize(viewPos - fragPosition);
+            vec3 norm = normalize(input.fragNormal);
+            vec3 viewDir = normalize(viewPos - input.fragPosition);
             vec3 reflectDir = reflect(-viewDir, norm);
-
-            fragColor = vec4(mix(objectColor, environmentColor, 0.5), 1.0);
+            vec3 environmentColor = texCUBE(environmentMap, reflectDir).rgb;
+            vec3 objectColor = tex2D(texture, input.fragPosition.xy).rgb;
+            vec3 finalColor = lerp(objectColor, environmentColor, 0.5);
+            fragColor = vec4(finalColor, 1.0);
+            return fragColor;
         }
     }
 }

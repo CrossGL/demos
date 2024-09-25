@@ -1,25 +1,37 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    struct VSInput {
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
+    };
 
-    void main() {
-        fragTexCoord = texCoord;
+    struct VSOutput {
+        vec3 positionOut @POSITION;
+        vec2 texCoord @TEXCOORD0;
+    };
+
+    struct PSInput {
+        vec2 texCoord @TEXCOORD0;
+    };
+
+    sampler2D texture;
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.texCoord = input.texCoord;
+            return output;
+        }
     }
-}
 
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
-
-    void main() {
-        vec4 color = texture(texture, fragTexCoord);
-        vec3 sepia = vec3(
-            dot(color, vec3(0.393, 0.769, 0.189)),
-            dot(color, vec3(0.349, 0.686, 0.168)),
-            dot(color, vec3(0.272, 0.534, 0.131))
-        );
-        fragColor = vec4(sepia, 1.0);
+    fragment {
+        vec4 main(PSInput input) @SV_TARGET {
+            vec4 color = texture.Sample(texture, input.texCoord);
+            vec3 sepia = vec3(
+                dot(color.rgb, vec3(0.393, 0.769, 0.189)),
+                dot(color.rgb, vec3(0.349, 0.686, 0.168)),
+                dot(color.rgb, vec3(0.272, 0.534, 0.131))
+            );
+            return vec4(sepia, 1.0);
+        }
     }
-}
 }

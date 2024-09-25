@@ -1,24 +1,52 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    struct VSInput {
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
+    };
 
-    void main() {
-        fragTexCoord = texCoord;
+    struct VSOutput {
+        vec4 gl_Position @SV_POSITION;
+        vec2 fragTexCoord @TEXCOORD0;
+    };
+
+    struct PSInput {
+        vec2 fragTexCoord @TEXCOORD0;
+    };
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.fragTexCoord = input.texCoord;
+            output.gl_Position = vec4(0.0, 0.0, 0.0, 1.0); // Placeholder for position
+            return output;
+        }
     }
-}
 
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
+    fragment {
+        vec4 main(PSInput input) @SV_TARGET {
+            sampler2D texture;
+            vec2 dotSize;
+            vec4 fragColor;
 
-    void main() {
-        float angle = mod(uv + uv, 2.0) * 3.14159265;
-        float radius = length(fract(uv) - vec2(0.5));
-        vec4 color = texture(texture, fragTexCoord);
-        float itensity = dot(color, vec3(0.299, 0.587, 0.114));
-        float dot = smoothstep(0.4, 0.5, sin(angle) * 0.5 + radius);
-        fragColor = vec4(vec3(dot * itensity), 1.0);
+            // Scale texture coordinates by dotSize
+            vec2 uv = input.fragTexCoord * dotSize;
+
+            // Calculate angle and radius for the dot pattern
+            vec2 angle = fmod(uv.x + uv.y, 2.0) * 3.14159265;
+            vec2 radius = length(frac(uv) - vec2(0.5));
+
+            // Sample color from texture
+            vec4 color = tex2D(texture, input.fragTexCoord);
+
+            // Calculate intensity based on luminance
+            vec2 intensity = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+
+            // Compute dot pattern using smoothstep for edge softness
+            vec2 dot = smoothstep(0.4, 0.5, sin(angle) * 0.5 + radius);
+
+            // Set fragment color with dot pattern applied
+            fragColor = vec4(vec3(dot * intensity), 1.0);
+            return fragColor;
+        }
     }
-}
 }

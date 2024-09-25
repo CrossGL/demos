@@ -1,20 +1,36 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    struct VSInput {
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
+    };
 
-    void main() {
-        fragTexCoord = texCoord;
-    }
-}
+    struct VSOutput {
+        vec4 gl_Position @SV_POSITION;
+        vec2 fragTexCoord @TEXCOORD0;
+    };
 
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
-    
-    void main() {
-        vec3 color = mix(bottomColor, topColor, fragTexCoord.y);
-        fragColor = vec4(color, 1.0);
+    struct PSInput {
+        vec2 fragTexCoord @TEXCOORD0;
+    };
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.fragTexCoord = input.texCoord;
+            output.gl_Position = vec4(0.0, 0.0, 0.0, 1.0); // Placeholder for position
+            return output;
+        }
     }
-}
+
+    fragment {
+        vec4 main(PSInput input) @SV_TARGET {
+            vec3 topColor;
+            vec3 bottomColor;
+            vec4 fragColor;
+
+            vec3 color = lerp(bottomColor, topColor, input.fragTexCoord.y);
+            fragColor = vec4(color, 1.0);
+            return fragColor;
+        }
+    }
 }

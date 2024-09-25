@@ -1,19 +1,28 @@
 shader main {
-    vertex {
-        input vec3 position;
-        output vec4 color;
+    struct VSInput {
+        vec3 position @POSITION;
+    };
 
-        void main() {
-            color = vec4(position, 1.0);
+    struct VSOutput {
+        vec3 positionOut @POSITION;
+        vec4 color @COLOR;
+    };
+
+    struct PSInput {
+        vec4 color @COLOR;
+    };
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.color = vec4(input.position, 1.0);
+            return output;
         }
     }
-    
-    fragment {
-        input vec4 color;
-        output vec4 fragColor;
 
-        void main() {
-            fragColor = color;
+    fragment {
+        vec4 main(PSInput input) @SV_TARGET {
+            return input.color;
         }
     }
 }

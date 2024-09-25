@@ -1,22 +1,36 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragCoord;
+    struct VSInput {
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
+    };
 
-    // Pass through the texture coordinates to the fragment shader
-    void main() {
-        fragCoord = texCoord;
+    struct VSOutput {
+        vec4 color @COLOR;
+    };
+
+    struct PSInput {
+        vec4 color @COLOR;
+    };
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.color = vec4(input.texCoord, 0.0, 1.0);
+            return output;
+        }
     }
-}
 
-fragment {
-    input vec2 fragCoord;
-    output vec4 fragColor;
+    fragment {
+        vec4 main(PSInput input) @SV_TARGET {
+            sampler2D texture;
+            vec2 threshold;
+            vec4 fragColor;
 
-    void main() {
-        vec4 color = texture(texture, fragCoord);
-        vec4 bloom = max(color - threshold, 0.0);
-        fragColor = color + bloom;
+            vec2 texCoord = input.color.xy; // Extract the texture coordinate
+            vec4 texColor = tex2D(texture, texCoord);
+            vec4 bloom = max(texColor - threshold, 0.0);
+            fragColor = texColor + bloom;
+            return fragColor;
+        }
     }
-}
 }

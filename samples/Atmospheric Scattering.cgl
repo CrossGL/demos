@@ -1,20 +1,48 @@
 shader main {
+
+    struct VSInput {
+        vec3 position @POSITION;
+        vec3 position @POSITION;
+    };
+
+    struct VSOutput {
+        vec4 color @COLOR;
+    };
+
     vertex {
-        // Vertex shader logic goes here.
+        VSOutput main(VSInput input) {
+            VSOutput output;
+
+            // Rayleigh scattering function
+            vec3 rayleighScattering(vec2 theta) {
+                return vec3(0.5, 0.7, 1.0) * pow(max(0.0, 1.0 - theta * theta), 3.0);
+            }
+
+            // Compute the color based on Rayleigh scattering
+            vec2 theta = input.position.y;
+            vec3 colorComputed = rayleighScattering(theta);
+            output.color = vec4(colorComputed, 1.0);
+
+            return output;
+        }
     }
 
+    struct PSInput {
+        vec4 color @COLOR;
+    };
+
+    struct PSOutput {
+        vec4 fragColor @SV_TARGET;
+    };
+
     fragment {
-        input vec3 position;
-        output vec4 fragColor;
+        PSOutput main(PSInput input) {
+            PSOutput output;
 
-        vec3 rayleighScattering(float theta) {
-            return vec3(0.5, 0.7, 1.0) * pow(max(0.0, 1.0 - theta * theta), 3.0);
-        }
+            // Pass the vertex shader color to the fragment shader output
+            output.fragColor = input.color;
 
-        void main() {
-            float theta = position.y;
-            vec3 color = rayleighScattering(theta);
-            fragColor = vec4(color, 1.0);
+            return output;
         }
     }
 }

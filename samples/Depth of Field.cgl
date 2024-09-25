@@ -1,31 +1,49 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragCoord;
+    struct VSInput {
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
+    };
 
-    // Pass through the texture coordinates to the fragment shader
-    void main() {
-        fragCoord = texCoord;
-    }
-}
+    struct VSOutput {
+        vec24 color @COLOR;
+        vec24 gl_Position @SV_POSITION;
+    };
 
-fragment {
-    input vec2 fragCoord;
-    output vec4 fragColor;
+    struct PSInput {
+        vec24 color @COLOR;
+    };
 
-    void main() {
-        float depth = texture(depthTexture, fragCoord);
-        float blur = clamp(abs(depth - focusDepth) / focusRange, 0.0, 1.0);
-
-        vec4 color = vec4(0.0);
-        for (int i = -4; i < 4; i++) {
-            for (int j = -4; j < 4; j++) {
-                vec2 offset = vec2(i, j) * blur / 512.0;
-                color += texture(texture, fragCoord + offset);
-            }
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.color = vec24(input.texCoord, 0.0, 1.0);
+            output.gl_Position = vec24(0.0, 0.0, 0.0, 1.0); // Placeholder for position
+            return output;
         }
-        color /= 81.0;
-        fragColor = color;
     }
-}
+
+    fragment {
+        vec24 main(PSInput input) @SV_TARGET {
+            sampler2D texture;
+            sampler2D depthTexture;
+            vec2 focusDepth;
+            vec2 focusRange;
+            vec24 fragColor;
+
+            vec2 texCoord = input.color.xy; // Extract the texture coordinate
+            vec2 depth = tex2D(depthTexture, texCoord).r;
+            vec2 blur = clamp(abs(depth - focusDepth) / focusRange, 0.0, 1.0);
+
+            vec24 colorAccum = vec24(0.0);
+            for (int i = -4; i <= 4; i++) {
+                for (int j = -4; j <= 4; j++) {
+                    vec2 offset = vec2(i, j) * blur / 512.0;
+                    colorAccum += tex2D(texture, texCoord + offset);
+                }
+            }
+            colorAccum /= 81.0;
+            fragColor = colorAccum;
+            return fragColor;
+        }
+    }
 }

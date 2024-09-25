@@ -1,35 +1,47 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    struct VSInput {
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
+    };
 
-    void main() {
-        fragTexCoord = texCoord;
+    struct VSOutput {
+        vec3 positionOut @POSITION;
+        vec2 texCoord @TEXCOORD0;
+    };
+
+    struct PSInput {
+        vec2 texCoord @TEXCOORD0;
+    };
+
+    sampler2D texture;
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.texCoord = input.texCoord;
+            return output;
+        }
     }
-}
 
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
+    fragment {
+        vec4 main(PSInput input) @SV_TARGET {
+            vec2 texCoord = input.texCoord;
+            vec2 texOffset = vec2(1.0 / 512.0); // Offset to sample neighboring pixels
+            vec2 kernel[9] = {-1.0, -1.0, -1.0, -1.0, 8.0, -1.0, -1.0, -1.0, -1.0};
 
-    void main() {
-        vec2 texOffset = vec2(1.0 / 512.0); // Offset for sampling
-        vec3 color = vec3(0.0);
+            vec3 sample[9];
+            for (int i = -1; i <= 1; i++) {
+                for (int j = -1; j <= 1; j++) {
+                    sample[(i + 1) * 3 + (j + 1)] = texture.Sample(texture, texCoord + vec2(i, j) * texOffset).rgb;
+                }
+            }
 
-        // Apply a simple edge detection filter
-        color += texture(texture, fragTexCoord + vec2(-texOffset, -texOffset)) * -1.0;
-        color += texture(texture, fragTexCoord + vec2(0.0, -texOffset)) * -1.0;
-        color += texture(texture, fragTexCoord + vec2(texOffset, -texOffset)) * -1.0;
+            vec3 color = vec3(0.0);
+            for (int i = 0; i < 9; i++) {
+                color += sample[i] * kernel[i];
+            }
 
-        color += texture(texture, fragTexCoord + vec2(-texOffset, 0.0)) * -1.0;
-        color += texture(texture, fragTexCoord) *  8.0;
-        color += texture(texture, fragTexCoord + vec2(texOffset, 0.0)) * -1.0;
-
-        color += texture(texture, fragTexCoord + vec2(-texOffset, texOffset)) * -1.0;
-        color += texture(texture, fragTexCoord + vec2(0.0, texOffset)) * -1.0;
-        color += texture(texture, fragTexCoord + vec2(texOffset, texOffset)) * -1.0;
-
-        fragColor = vec4(color, 1.0);
+            return vec4(color, 1.0);
+        }
     }
-}
 }

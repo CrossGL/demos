@@ -1,21 +1,33 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
 
-    void main() {
-        fragTexCoord = texCoord;
-    }
+    struct VSInput {
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
+    };
+
+    struct VSOutput {
+        vec4 fragColor @SV_TARGET;
+    };
+
+   cbuffer ShaderUniforms { 
+    vec2 eyeOffset; 
 }
 
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
+sampler2D texture; 
 
-    void main() {
-        vec4 leftColor = texture(texture, fragTexCoord - eyeOffset);
-        vec4 rightColor = texture(texture, fragTexCoord + eyeOffset);
-        fragColor = vec4(leftColor, rightColor, rightColor, 1.0);
+
+    fragment {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+
+            // Sample from the texture with eye offset
+            vec4 leftColor = texture(texture, input.texCoord - eyeOffset);
+            vec4 rightColor = texture(texture, input.texCoord + eyeOffset);
+
+            // Combine the left and right colors for stereoscopic effect
+            output.fragColor = vec4(leftColor.r, rightColor.g, rightColor.b, 1.0);
+
+            return output;
+        }
     }
-}
 }

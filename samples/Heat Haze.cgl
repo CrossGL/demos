@@ -1,22 +1,37 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    struct VSInput {
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
+    };
 
-    // Pass through texCoord to the fragment shader
-    void main() {
-        fragTexCoord = texCoord;
+    struct VSOutput {
+        vec2 texCoordOut @TEXCOORD0;
+        vec4 gl_Position @SV_POSITION;
+    };
+
+    struct PSInput {
+        vec2 texCoordOut @TEXCOORD0;
+    };
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.texCoordOut = input.texCoord;
+            output.gl_Position = vec4(0.0, 0.0, 0.0, 1.0); // Placeholder for position
+            return output;
+        }
     }
-}
 
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
+    fragment {
+        vec4 main(PSInput input) @SV_TARGET {
+            sampler2D texture;
+            vec2 time;
+            vec4 fragColor;
 
-    void main() {
-        vec2 uv = fragTexCoord + sin(fragTexCoord.y * 10.0 + time) * 0.01;
-        vec4 color = texture(texture, uv);
-        fragColor = vec4(color.rgb, 1.0);
+            vec2 uv = input.texCoordOut + sin(input.texCoordOut.y * 10.0 + time) * 0.01;
+            vec4 color = tex2D(texture, uv);
+            fragColor = vec4(color.rgb, 1.0);
+            return fragColor;
+        }
     }
-}
 }

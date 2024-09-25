@@ -1,22 +1,31 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    struct PSInput {
+        vec2 texCoord @TEXCOORD0; // Input texture coordinate
+    };
 
-    void main() {
-        fragTexCoord = texCoord;
-    }
-}
-
-fragment {
-    input vec2 fragTexCoord;
     output vec4 fragColor;
 
-    void main() {
-        vec4 color = texture(texture, fragTexCoord);
-        float dist = distance(fragTexCoord, vec2(0.5));
-        float vignette = smoothstep(radius, radius - softness, dist);
-        fragColor = vec4(color * vignette, 1.0);
-    }
+    cbuffer ShaderUniforms { 
+    vec2 radius; 
+    vec2 softness; 
 }
+
+sampler2D texture; 
+
+
+    fragment {
+        vec4 main(PSInput input) @SV_TARGET {
+            // Sample the texture at the input texture coordinates
+            vec4 color = texture(texture, input.texCoord);
+            
+            // Calculate the distance from the center (0.5, 0.5)
+            vec2 dist = distance(input.texCoord, vec2(0.5));
+            
+            // Compute the vignette effect using smoothstep
+            vec2 vignette = smoothstep(radius, radius - softness, dist);
+            
+            // Set the fragment color applying the vignette effect
+            return vec4(color.rgb * vignette, 1.0);
+        }
+    }
 }

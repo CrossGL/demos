@@ -1,23 +1,41 @@
 shader main {
-vertex {
-    input vec2 texCoord;
-    output vec2 fragTexCoord;
+    struct VSInput {
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
+    };
 
-    // Pass through texCoord to the fragment shader
-    void main() {
-        fragTexCoord = texCoord;
-    }
+    struct VSOutput {
+        vec3 positionOut @POSITION;
+        vec2 texCoordOut @TEXCOORD0;
+    };
+
+    struct PSInput {
+        vec2 texCoordOut @TEXCOORD0;
+    };
+
+    cbuffer ShaderUniforms { 
+    vec2 viewDir; 
 }
 
-fragment {
-    input vec2 fragTexCoord;
-    output vec4 fragColor;
+sampler2D texture; 
+sampler2D heightMap; 
 
-    void main() {
-        float height = texture(heightMap, fragTexCoord);
-        vec2 offset = height * viewDir;
-        vec4 color = texture(texture, fragTexCoord + offset);
-        fragColor = vec4(color, 1.0);
+
+    vertex {
+        VSOutput main(VSInput input) {
+            VSOutput output;
+            output.texCoordOut = input.texCoord;
+            return output;
+        }
     }
-}
+
+    fragment {
+        vec4 main(PSInput input) @SV_TARGET {
+            vec2 texCoordOut = input.texCoordOut;
+            vec2 height = texture.Sample(heightMap, texCoordOut).r;
+            vec2 offset = height * viewDir;
+            vec4 color = texture.Sample(texture, texCoordOut + offset);
+            return vec4(color.rgb, 1.0);
+        }
+    }
 }
