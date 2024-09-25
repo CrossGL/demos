@@ -1,11 +1,12 @@
 shader main {
 
     struct VSInput {
-        float3 position @POSITION;
+        vec3 position @POSITION;
+        vec3 position @POSITION;
     };
 
     struct VSOutput {
-        float4 color @COLOR;
+        vec4 color @COLOR;
     };
 
     vertex {
@@ -13,25 +14,25 @@ shader main {
             VSOutput output;
 
             // Rayleigh scattering function
-            float3 rayleighScattering(float theta) {
-                return float3(0.5, 0.7, 1.0) * pow(max(0.0, 1.0 - theta * theta), 3.0);
+            vec3 rayleighScattering(vec2 theta) {
+                return vec3(0.5, 0.7, 1.0) * pow(max(0.0, 1.0 - theta * theta), 3.0);
             }
 
             // Compute the color based on Rayleigh scattering
-            float theta = input.position.y;
-            float3 colorComputed = rayleighScattering(theta);
-            output.color = float4(colorComputed, 1.0);
+            vec2 theta = input.position.y;
+            vec3 colorComputed = rayleighScattering(theta);
+            output.color = vec4(colorComputed, 1.0);
 
             return output;
         }
     }
 
     struct PSInput {
-        float4 color @COLOR;
+        vec4 color @COLOR;
     };
 
     struct PSOutput {
-        float4 fragColor @SV_TARGET;
+        vec4 fragColor @SV_TARGET;
     };
 
     fragment {

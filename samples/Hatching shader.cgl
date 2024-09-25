@@ -1,44 +1,45 @@
 shader main {
     struct VSInput {
-        float2 texCoord @TEXCOORD0;
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
     };
 
     struct VSOutput {
-        float4 gl_Position @SV_POSITION;
-        float2 fragTexCoord @TEXCOORD0;
+        vec4 gl_Position @SV_POSITION;
+        vec2 fragTexCoord @TEXCOORD0;
     };
 
     struct PSInput {
-        float2 fragTexCoord @TEXCOORD0;
+        vec2 fragTexCoord @TEXCOORD0;
     };
 
     vertex {
         VSOutput main(VSInput input) {
             VSOutput output;
             output.fragTexCoord = input.texCoord;
-            output.gl_Position = float4(0.0, 0.0, 0.0, 1.0); // Placeholder for position
+            output.gl_Position = vec4(0.0, 0.0, 0.0, 1.0); // Placeholder for position
             return output;
         }
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
+        vec4 main(PSInput input) @SV_TARGET {
             sampler2D texture;
-            float threshold1;
-            float threshold2;
-            float threshold3;
-            float4 fragColor;
+            vec2 threshold1;
+            vec2 threshold2;
+            vec2 threshold3;
+            vec4 fragColor;
 
-            float4 color = tex2D(texture, input.fragTexCoord);
-            float intensity = dot(color.rgb, float3(0.299, 0.587, 0.114));
+            vec4 color = tex2D(texture, input.fragTexCoord);
+            vec2 intensity = dot(color.rgb, vec3(0.299, 0.587, 0.114));
 
-            float3 hatching = float3(1.0);
-            if (intensity < threshold1) hatching = float3(0.8);
-            else if (intensity < threshold2) hatching = float3(0.6);
-            else if (intensity < threshold3) hatching = float3(0.4);
-            else hatching = float3(0.2);
+            vec3 hatching = vec3(1.0);
+            if (intensity < threshold1) hatching = vec3(0.8);
+            else if (intensity < threshold2) hatching = vec3(0.6);
+            else if (intensity < threshold3) hatching = vec3(0.4);
+            else hatching = vec3(0.2);
 
-            fragColor = float4(hatching, 1.0);
+            fragColor = vec4(hatching, 1.0);
             return fragColor;
         }
     }

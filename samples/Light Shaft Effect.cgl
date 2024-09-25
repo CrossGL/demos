@@ -1,18 +1,24 @@
 shader main {
     struct VSInput {
-        float2 texCoord @TEXCOORD0;
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
     };
 
     struct VSOutput {
-        float2 texCoord @TEXCOORD0;
+        vec3 positionOut @POSITION
+        vec2 texCoord @TEXCOORD0;
     };
 
     struct PSInput {
-        float2 texCoord @TEXCOORD0;
+        vec2 texCoord @TEXCOORD0;
     };
 
-    uniform sampler2D texture;
-    uniform float2 lightPos;
+    cbuffer ShaderUniforms { 
+    vec2 lightPos; 
+}
+
+sampler2D texture; 
+
 
     vertex {
         VSOutput main(VSInput input) {
@@ -23,12 +29,12 @@ shader main {
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
-            float2 uv = input.texCoord;
-            float4 color = texture.Sample(texture, uv);
-            float2 dir = uv - lightPos;
-            float dist = length(dir);
-            float4 shaftColor = texture.Sample(texture, uv - dir * (1.0 - dist));
+        vec4 main(PSInput input) @SV_TARGET {
+            vec2 uv = input.texCoord;
+            vec4 color = texture.Sample(texture, uv);
+            vec2 dir = uv - lightPos;
+            vec2 dist = length(dir);
+            vec4 shaftColor = texture.Sample(texture, uv - dir * (1.0 - dist));
             return lerp(color, shaftColor, 0.5);
         }
     }

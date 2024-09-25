@@ -1,47 +1,47 @@
 shader complexShader {
     struct VSInput {
-        float3 position @POSITION;
-        float2 texCoord @TEXCOORD0;
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
     };
 
     struct VSOutput {
-        float4 color @COLOR;
-        float4 gl_Position @SV_POSITION;
+        vec4 color @COLOR;
+        vec4 gl_Position @SV_POSITION;
     };
 
     struct PSInput {
-        float4 color @COLOR;
+        vec4 color @COLOR;
     };
 
     vertex {
-        float calculateLighting(float3 normal, float3 lightDir) {
-            float diff = max(dot(normal, lightDir), 0.0);
+        vec2 calculateLighting(vec3 normal, vec3 lightDir) {
+            vec2 diff = max(dot(normal, lightDir), 0.0);
             return diff;
         }
 
-        float4 textureColor(float2 coord) {
+        vec4 textureColor(vec2 coord) {
             return tex2D(textureSampler, coord);
         }
 
         VSOutput main(VSInput input) {
             VSOutput output;
-            float3 normal = normalize(float3(0.0, 0.0, 1.0));
-            float3 lightDir = normalize(float3(1.0, 1.0, 1.0));
-            float lightIntensity = calculateLighting(normal, lightDir);
+            vec3 normal = normalize(vec3(0.0, 0.0, 1.0));
+            vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
+            vec2 lightIntensity = calculateLighting(normal, lightDir);
 
-            float4 texColor = textureColor(input.texCoord);
+            vec4 texColor = textureColor(input.texCoord);
             output.color = texColor * lightIntensity; // Apply lighting to color
 
             // Pass texture coordinates to fragment shader
             output.color.xy = input.texCoord;
-            output.gl_Position = float4(input.position, 1.0);
+            output.gl_Position = vec4(input.position, 1.0);
             return output;
         }
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
-            float4 fragColor;
+        vec4 main(PSInput input) @SV_TARGET {
+            vec4 fragColor;
             fragColor = input.color;
             return fragColor;
         }

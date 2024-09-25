@@ -1,18 +1,18 @@
 shader main {
     struct VSInput {
-        float3 position @POSITION;
-        float2 texCoord @TEXCOORD0;
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
     };
 
     struct VSOutput {
-        float2 fragTexCoord @TEXCOORD0;
-        float3 fragPosition @POSITION;
-        float4 gl_Position @SV_POSITION;
+        vec2 fragTexCoord @TEXCOORD0;
+        vec3 fragPosition @POSITION;
+        vec4 gl_Position @SV_POSITION;
     };
 
     struct PSInput {
-        float2 fragTexCoord @TEXCOORD0;
-        float3 fragPosition @POSITION;
+        vec2 fragTexCoord @TEXCOORD0;
+        vec3 fragPosition @POSITION;
     };
 
     vertex {
@@ -20,23 +20,23 @@ shader main {
             VSOutput output;
             output.fragTexCoord = input.texCoord;
             output.fragPosition = input.position;
-            output.gl_Position = float4(input.position, 1.0);
+            output.gl_Position = vec4(input.position, 1.0);
             return output;
         }
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
+        vec4 main(PSInput input) @SV_TARGET {
             sampler2D texture;
-            float3 fogColor;
-            float fogDensity;
-            float4 fragColor;
+            vec3 fogColor;
+            vec2 fogDensity;
+            vec4 fragColor;
 
-            float3 baseColor = tex2D(texture, input.fragTexCoord).rgb;
-            float depth = length(input.fragPosition);
-            float fogFactor = exp(-fogDensity * depth);
-            float3 finalColor = lerp(fogColor, baseColor, fogFactor);
-            fragColor = float4(finalColor, 1.0);
+            vec3 baseColor = tex2D(texture, input.fragTexCoord).rgb;
+            vec2 depth = length(input.fragPosition);
+            vec2 fogFactor = exp(-fogDensity * depth);
+            vec3 finalColor = lerp(fogColor, baseColor, fogFactor);
+            fragColor = vec4(finalColor, 1.0);
             return fragColor;
         }
     }

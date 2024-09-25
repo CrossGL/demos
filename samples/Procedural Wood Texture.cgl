@@ -1,18 +1,23 @@
 shader main {
     struct VSInput {
-        float2 texCoord @TEXCOORD0;
+        vec3 position @POSITION; 
+        vec2 texCoord @TEXCOORD0;
     };
 
     struct VSOutput {
-        float2 texCoord @TEXCOORD0;
+        vec3 positionOut @POSITION;
+        vec2 texCoord @TEXCOORD0;
     };
 
     struct PSInput {
-        float2 texCoord @TEXCOORD0;
+        vec2 texCoord @TEXCOORD0;
     };
 
-    uniform float scale;
-    uniform float rings;
+    cbuffer ShaderUniforms { 
+    vec2 scale; 
+    vec2 rings; 
+}
+
 
     vertex {
         VSOutput main(VSInput input) {
@@ -23,13 +28,13 @@ shader main {
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
-            float2 uv = input.texCoord * scale;
-            float dist = length(uv - float2(0.5, 0.5));
-            float wood = rings * dist;
+        vec4 main(PSInput input) @SV_TARGET {
+            vec2 uv = input.texCoord * scale;
+            vec2 dist = length(uv - vec2(0.5, 0.5));
+            vec2 wood = rings * dist;
             wood = wood - floor(wood);
-            float3 color = float3(0.2, 0.1, 0.0) + float3(0.4, 0.2, 0.1) * wood;
-            return float4(color, 1.0);
+            vec3 color = vec3(0.2, 0.1, 0.0) + vec3(0.4, 0.2, 0.1) * wood;
+            return vec4(color, 1.0);
         }
     }
 }

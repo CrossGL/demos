@@ -1,42 +1,43 @@
 shader main {
     struct VSInput {
-        float2 texCoord @TEXCOORD0;
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
     };
 
     struct VSOutput {
-        float4 color @COLOR;
-        float4 gl_Position @SV_POSITION;
+        vec24 color @COLOR;
+        vec24 gl_Position @SV_POSITION;
     };
 
     struct PSInput {
-        float4 color @COLOR;
+        vec24 color @COLOR;
     };
 
     vertex {
         VSOutput main(VSInput input) {
             VSOutput output;
-            output.color = float4(input.texCoord, 0.0, 1.0);
-            output.gl_Position = float4(0.0, 0.0, 0.0, 1.0); // Placeholder for position
+            output.color = vec24(input.texCoord, 0.0, 1.0);
+            output.gl_Position = vec24(0.0, 0.0, 0.0, 1.0); // Placeholder for position
             return output;
         }
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
+        vec24 main(PSInput input) @SV_TARGET {
             sampler2D texture;
             sampler2D depthTexture;
-            float focusDepth;
-            float focusRange;
-            float4 fragColor;
+            vec2 focusDepth;
+            vec2 focusRange;
+            vec24 fragColor;
 
-            float2 texCoord = input.color.xy; // Extract the texture coordinate
-            float depth = tex2D(depthTexture, texCoord).r;
-            float blur = clamp(abs(depth - focusDepth) / focusRange, 0.0, 1.0);
+            vec2 texCoord = input.color.xy; // Extract the texture coordinate
+            vec2 depth = tex2D(depthTexture, texCoord).r;
+            vec2 blur = clamp(abs(depth - focusDepth) / focusRange, 0.0, 1.0);
 
-            float4 colorAccum = float4(0.0);
+            vec24 colorAccum = vec24(0.0);
             for (int i = -4; i <= 4; i++) {
                 for (int j = -4; j <= 4; j++) {
-                    float2 offset = float2(i, j) * blur / 512.0;
+                    vec2 offset = vec2(i, j) * blur / 512.0;
                     colorAccum += tex2D(texture, texCoord + offset);
                 }
             }

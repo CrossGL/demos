@@ -1,35 +1,36 @@
 shader main {
     struct VSInput {
-        float2 texCoord @TEXCOORD0;
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
     };
 
     struct VSOutput {
-        float2 texCoordOut @TEXCOORD0;
-        float4 gl_Position @SV_POSITION;
+        vec2 texCoordOut @TEXCOORD0;
+        vec4 gl_Position @SV_POSITION;
     };
 
     struct PSInput {
-        float2 texCoordOut @TEXCOORD0;
+        vec2 texCoordOut @TEXCOORD0;
     };
 
     vertex {
         VSOutput main(VSInput input) {
             VSOutput output;
             output.texCoordOut = input.texCoord;
-            output.gl_Position = float4(0.0, 0.0, 0.0, 1.0); // Placeholder for position
+            output.gl_Position = vec4(0.0, 0.0, 0.0, 1.0); // Placeholder for position
             return output;
         }
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
+        vec4 main(PSInput input) @SV_TARGET {
             sampler2D texture;
-            float time;
-            float4 fragColor;
+            vec2 time;
+            vec4 fragColor;
 
-            float2 uv = input.texCoordOut + sin(input.texCoordOut.y * 10.0 + time) * 0.01;
-            float4 color = tex2D(texture, uv);
-            fragColor = float4(color.rgb, 1.0);
+            vec2 uv = input.texCoordOut + sin(input.texCoordOut.y * 10.0 + time) * 0.01;
+            vec4 color = tex2D(texture, uv);
+            fragColor = vec4(color.rgb, 1.0);
             return fragColor;
         }
     }

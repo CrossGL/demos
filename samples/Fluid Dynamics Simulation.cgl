@@ -1,35 +1,35 @@
 shader main {
     struct VSInput {
-        float3 position @POSITION;
+        vec3 position @POSITION;
     };
 
     struct VSOutput {
-        float4 color @COLOR;
-        float4 gl_Position @SV_POSITION;
+        vec4 color @COLOR;
+        vec4 gl_Position @SV_POSITION;
     };
 
     struct PSInput {
-        float4 color @COLOR;
+        vec4 color @COLOR;
     };
 
     vertex {
-        float fluidMotion(float3 p) {
+        vec2 fluidMotion(vec3 p) {
             return sin(p.x * 10.0 + iTime) * 0.5 + 0.5;
         }
 
         VSOutput main(VSInput input) {
             VSOutput output;
-            float motion = fluidMotion(input.position);
-            float3 colorComputed = float3(0.0, 0.0, 1.0) * motion;
-            output.color = float4(colorComputed, 1.0);
-            output.gl_Position = float4(input.position, 1.0);
+            vec2 motion = fluidMotion(input.position);
+            vec3 colorComputed = vec3(0.0, 0.0, 1.0) * motion;
+            output.color = vec4(colorComputed, 1.0);
+            output.gl_Position = vec4(input.position, 1.0);
             return output;
         }
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
-            float4 fragColor;
+        vec4 main(PSInput input) @SV_TARGET {
+            vec4 fragColor;
             fragColor = input.color;
             return fragColor;
         }

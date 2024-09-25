@@ -1,32 +1,32 @@
 shader main {
     struct VSInput {
-        float3 position @POSITION;
-        float3 normal @NORMAL;
+        vec3 position @POSITION;
+        vec3 normal @NORMAL;
     };
 
     struct VSOutput {
-        float4 gl_Position @SV_POSITION;
-        float3 fragNormal @NORMAL;
+        vec4 gl_Position @SV_POSITION;
+        vec3 fragNormal @NORMAL;
     };
 
     struct PSInput {
-        float3 fragNormal @NORMAL;
+        vec3 fragNormal @NORMAL;
     };
 
     vertex {
         VSOutput main(VSInput input) {
             VSOutput output;
             output.fragNormal = input.normal;
-            output.gl_Position = float4(input.position, 1.0);
+            output.gl_Position = vec4(input.position, 1.0);
             return output;
         }
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
-            float4 fragColor;
-            float3 color = float3(0.5, 0.5, 0.5) + 0.5 * input.fragNormal;
-            fragColor = float4(color, 1.0);
+        vec4 main(PSInput input) @SV_TARGET {
+            vec4 fragColor;
+            vec3 color = vec3(0.5, 0.5, 0.5) + 0.5 * input.fragNormal;
+            fragColor = vec4(color, 1.0);
             return fragColor;
         }
     }

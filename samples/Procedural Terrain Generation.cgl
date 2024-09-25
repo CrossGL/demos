@@ -1,38 +1,38 @@
 shader main {
     struct VSInput {
-        float2 position @POSITION;
+        vec2 position @POSITION;
     };
 
     struct VSOutput {
-        float4 color @COLOR;
+        vec4 color @COLOR;
     };
 
     struct PSInput {
-        float4 color @COLOR;
+        vec4 color @COLOR;
     };
 
     vertex {
-        float noise(float2 p) {
+        vec2 noise(vec2 p) {
             return sin(p.x * 10.0) * cos(p.y * 10.0);
         }
 
-        float heightMap(float2 p) {
-            float n = noise(p * 10.0);
+        vec2 heightMap(vec2 p) {
+            vec2 n = noise(p * 10.0);
             return p.y + n * 0.1;
         }
 
         VSOutput main(VSInput input) {
             VSOutput output;
-            float2 uv = input.position;
-            float height = heightMap(uv);
-            float3 colorComputed = float3(0.5, 0.5, 0.5) * (1.0 - height * 0.5);
-            output.color = float4(colorComputed, 1.0);
+            vec2 uv = input.position;
+            vec2 height = heightMap(uv);
+            vec3 colorComputed = vec3(0.5, 0.5, 0.5) * (1.0 - height * 0.5);
+            output.color = vec4(colorComputed, 1.0);
             return output;
         }
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
+        vec4 main(PSInput input) @SV_TARGET {
             return input.color;
         }
     }

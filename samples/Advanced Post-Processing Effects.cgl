@@ -1,37 +1,38 @@
 shader main {
 
     struct VSInput {
-        float2 texCoord @TEXCOORD0;
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
     };
 
     struct VSOutput {
-        float4 color @COLOR;
+        vec4 color @COLOR;
     };
 
-    uniform sampler2D iChannel0;
+    sampler2D iChannel0;
 
     vertex {
         VSOutput main(VSInput input) {
             VSOutput output;
 
             // Pass through texture coordinates as color
-            output.color = float4(input.texCoord, 0.0, 1.0);
+            output.color = vec4(input.texCoord, 0.0, 1.0);
 
             return output;
         }
     }
 
     fragment {
-        float4 main(VSOutput input) @SV_TARGET {
+        vec4 main(VSOutput input) @SV_TARGET {
             // Sample brightness and calculate bloom
-            float brightness = texture(iChannel0, input.color.xy).r;
-            float bloom = max(0.0, brightness - 0.5);
+            vec2 brightness = texture(iChannel0, input.color.xy).r;
+            vec2 bloom = max(0.0, brightness - 0.5);
 
             // Apply bloom to the texture color
-            float3 texColor = texture(iChannel0, input.color.xy).rgb;
-            float3 colorWithBloom = texColor + float3(bloom);
+            vec3 texColor = texture(iChannel0, input.color.xy).rgb;
+            vec3 colorWithBloom = texColor + vec3(bloom);
 
-            return float4(colorWithBloom, 1.0);
+            return vec4(colorWithBloom, 1.0);
         }
     }
 }

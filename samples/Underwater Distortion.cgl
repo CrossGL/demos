@@ -5,11 +5,15 @@ shader main {
 
     output vec4 fragColor;
 
-    uniform sampler2D texture;
-    uniform float time;
+   cbuffer ShaderUniforms { 
+    vec2 time; 
+}
+
+sampler2D texture; 
+
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
+        vec4 main(PSInput input) @SV_TARGET {
             // Compute the UV coordinates with a time-based offset
             vec2 uv = input.texCoord + vec2(sin(input.texCoord.y * 10.0 + time) * 0.01,
                                              cos(input.texCoord.x * 10.0 + time) * 0.01);
@@ -18,7 +22,7 @@ shader main {
             vec4 color = texture(texture, uv);
             
             // Set the fragment color
-            return float4(color.rgb, 1.0);
+            return vec4(color.rgb, 1.0);
         }
     }
 }

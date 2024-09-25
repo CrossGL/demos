@@ -1,22 +1,25 @@
 shader main {
     struct VSInput {
-        float3 position @POSITION;
-        float3 normal @NORMAL;
+        vec3 position @POSITION;
+        vec3 normal @NORMAL;
     };
 
     struct VSOutput {
-        float3 position @POSITION;
-        float3 normal @NORMAL;
+        vec3 positionOut @POSITION;
+        vec3 normal @NORMAL;
     };
 
     struct PSInput {
-        float3 position @POSITION;
-        float3 normal @NORMAL;
+        vec3 position @POSITION;
+        vec3 normal @NORMAL;
     };
 
-    uniform float3 viewPos;
-    uniform float3 rimColor;
-    uniform float rimPower;
+    cbuffer ShaderUniforms { 
+    vec3 viewPos; 
+    vec3 rimColor; 
+    vec2 rimPower; 
+}
+
 
     vertex {
         VSOutput main(VSInput input) {
@@ -28,11 +31,11 @@ shader main {
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
-            float3 viewDir = normalize(viewPos - input.position);
-            float rim = pow(1.0 - max(dot(input.normal, viewDir), 0.0), rimPower);
-            float3 color = float3(0.5, 0.5, 0.5) + rim * rimColor;
-            return float4(color, 1.0);
+        vec4 main(PSInput input) @SV_TARGET {
+            vec3 viewDir = normalize(viewPos - input.position);
+            vec2 rim = pow(1.0 - max(dot(input.normal, viewDir), 0.0), rimPower);
+            vec3 color = vec3(0.5, 0.5, 0.5) + rim * rimColor;
+            return vec4(color, 1.0);
         }
     }
 }

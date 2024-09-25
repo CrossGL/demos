@@ -1,26 +1,30 @@
 shader nestedLoopsShader {
     struct VSInput {
-        float3 position @POSITION;
-        float2 texCoord @TEXCOORD0;
-        float3 normal @NORMAL;
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
+        vec3 normal @NORMAL;
     };
 
     struct VSOutput {
-        float4 color @COLOR;
+        vec4 color @COLOR;
     };
 
     struct PSInput {
-        float4 color @COLOR;
+        vec4 color @COLOR;
     };
 
-    uniform sampler2D texture;
-    uniform float3 lightPos;
-    uniform float3 viewPos;
-    uniform float3 ambientColor;
-    uniform float shininess;
-    uniform float specularIntensity;
-    uniform int outerIterations;
-    uniform int innerIterations;
+    cbuffer ShaderUniforms { 
+    vec3 ambientColor; 
+    vec3 lightPos; 
+    vec3 viewPos; 
+    vec2 shininess;  
+    vec2 specularIntensity;  
+    int outerIterations; 
+    int innerIterations; 
+}
+
+sampler2D texture; 
+
 
     vertex {
         VSOutput main(VSInput input) {
@@ -38,24 +42,24 @@ shader nestedLoopsShader {
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
-            float2 texCoord = input.color.xy; // Extract the texture coordinate
-            float3 normal = input.color.zw; // Extract the normal
+        vec4 main(PSInput input) @SV_TARGET {
+            vec2 texCoord = input.color.xy; // Extract the texture coordinate
+            vec3 normal = input.color.zw; // Extract the normal
 
             vec4 texColor = texture.Sample(texture, texCoord);
-            float3 lightDir = normalize(lightPos - float3(texCoord, 0.0));
-            float3 viewDir = normalize(viewPos - float3(texCoord, 0.0));
+            vec3 lightDir = normalize(lightPos - vec3(texCoord, 0.0));
+            vec3 viewDir = normalize(viewPos - vec3(texCoord, 0.0));
 
-            float3 ambient = ambientColor;
-            float3 diffuse = texColor.rgb;
-            float3 specular = float3(0.0);
+            vec3 ambient = ambientColor;
+            vec3 diffuse = texColor.rgb;
+            vec3 specular = vec3(0.0);
 
             // Outer loop
             for (int i = 0; i < outerIterations; i++) {
                 // Inner loop
                 for (int j = 0; j < innerIterations; j++) {
                     // Compute lighting
-                    float3 tempSpecular = calculateSpecular(normal, lightDir, viewDir);
+                    vec3 tempSpecular = calculateSpecular(normal, lightDir, viewDir);
                     specular += tempSpecular;
                 }
 
@@ -63,14 +67,14 @@ shader nestedLoopsShader {
                 diffuse *= 0.9;
             }
 
-            float3 lighting = ambient + diffuse + specular;
-            return float4(lighting, 1.0);
+            vec3 lighting = ambient + diffuse + specular;
+            return vec4(lighting, 1.0);
         }
 
-        float3 calculateSpecular(float3 normal, float3 lightDir, float3 viewDir) {
-            float3 reflectDir = reflect(-lightDir, normal);
-            float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-            return spec * float3(1.0, 1.0, 1.0) * specularIntensity;
+        vec3 calculateSpecular(vec3 normal, vec3 lightDir, vec3 viewDir) {
+            vec3 reflectDir = reflect(-lightDir, normal);
+            vec2 spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+            return spec * vec3(1.0, 1.0, 1.0) * specularIntensity;
         }
     }
 }

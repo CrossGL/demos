@@ -5,7 +5,7 @@ shader main {
 
     output vec4 fragColor;
 
-    float hash(vec2 p) {
+    vec2 hash(vec2 p) {
         p = fract(p * vec2(123.34, 456.21));
         p += dot(p, p + 34.56);
         return fract(p.x * p.y);
@@ -15,16 +15,16 @@ shader main {
         return fract(sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)))) * 43758.5453);
     }
 
-    float voronoi(vec2 p) {
+    vec2 voronoi(vec2 p) {
         vec2 g = floor(p);
         vec2 f = fract(p);
 
-        float d = 1.0;
+        vec2 d = 1.0;
         for (int j = -1; j <= 1; j++) {
             for (int i = -1; i <= 1; i++) {
-                vec2 b = vec2(float(i), float(j));
+                vec2 b = vec2(vec2(i), vec2(j));
                 vec2 r = b - f + random2(g + b);
-                float d2 = dot(r, r);
+                vec2 d2 = dot(r, r);
 
                 if (d2 < d) {
                     d = d2;
@@ -38,12 +38,12 @@ shader main {
     uniform sampler2D texture;
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
+        vec4 main(PSInput input) @SV_TARGET {
             vec2 uv = input.texCoord * 10.0;
-            float v = voronoi(uv);
+            vec2 v = voronoi(uv);
 
             vec3 color = vec3(v);
-            return float4(color, 1.0);
+            return vec4(color, 1.0);
         }
     }
 }

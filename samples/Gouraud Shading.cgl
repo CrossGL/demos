@@ -1,18 +1,18 @@
 shader main {
     struct VSInput {
-        float3 position @POSITION;
-        float3 normal @NORMAL;
+        vec3 position @POSITION;
+        vec3 normal @NORMAL;
     };
 
     struct VSOutput {
-        float4 gl_Position @SV_POSITION;
-        float3 fragPosition @POSITION;
-        float3 fragNormal @NORMAL;
+        vec4 gl_Position @SV_POSITION;
+        vec3 fragPosition @POSITION;
+        vec3 fragNormal @NORMAL;
     };
 
     struct PSInput {
-        float3 fragPosition @POSITION;
-        float3 fragNormal @NORMAL;
+        vec3 fragPosition @POSITION;
+        vec3 fragNormal @NORMAL;
     };
 
     vertex {
@@ -20,21 +20,21 @@ shader main {
             VSOutput output;
             output.fragPosition = input.position;
             output.fragNormal = input.normal;
-            output.gl_Position = float4(input.position, 1.0);
+            output.gl_Position = vec4(input.position, 1.0);
             return output;
         }
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
-            float3 lightPos;
-            float4 fragColor;
+        vec4 main(PSInput input) @SV_TARGET {
+            vec3 lightPos;
+            vec4 fragColor;
 
-            float3 norm = normalize(input.fragNormal);
-            float3 lightDir = normalize(lightPos - input.fragPosition);
-            float diff = max(dot(norm, lightDir), 0.0);
-            float3 color = float3(0.5, 0.5, 0.5) + diff;
-            fragColor = float4(color, 1.0);
+            vec3 norm = normalize(input.fragNormal);
+            vec3 lightDir = normalize(lightPos - input.fragPosition);
+            vec2 diff = max(dot(norm, lightDir), 0.0);
+            vec3 color = vec3(0.5, 0.5, 0.5) + diff;
+            fragColor = vec4(color, 1.0);
             return fragColor;
         }
     }

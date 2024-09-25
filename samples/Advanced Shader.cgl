@@ -1,24 +1,28 @@
 shader advancedShader {
 
     struct VSInput {
-        float3 position @POSITION;
-        float2 texCoord @TEXCOORD0;
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
     };
 
     struct VSOutput {
-        float4 color @COLOR;
+        vec4 color @COLOR;
     };
 
-    uniform float3 ambientColor;
-    uniform float3 lightPos;
-    uniform float3 viewPos;
-    uniform float shininess;
-    uniform sampler2D textureSampler;
+   cbuffer anyidentifier {
+    vec3 ambientColor;
+    vec3 lightPos;
+    vec3 viewPos;
+    vec2 shininess;
+    vec2 eyeoffset;  // Other uniforms if necessary
+}
+sampler2D textureSampler;
 
-    float3 calculateSpecular(float3 normal, float3 lightDir, float3 viewDir) {
-        float3 reflectDir = reflect(-lightDir, normal);
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-        return spec * float3(1.0, 1.0, 1.0);  // White specular highlight
+
+    vec3 calculateSpecular(vec3 normal, vec3 lightDir, vec3 viewDir) {
+        vec3 reflectDir = reflect(-lightDir, normal);
+        vec2 spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+        return spec * vec3(1.0, 1.0, 1.0);  // White specular highlight
     }
 
     vertex {
@@ -29,22 +33,22 @@ shader advancedShader {
             output.color.xy = input.texCoord;
 
             // Calculate normal in the vertex shader
-            float3 norm = normalize(cross(dFdx(input.position), dFdy(input.position)));
-            float3 lightDir = normalize(lightPos - input.position);
-            float3 viewDir = normalize(viewPos - input.position);
+            vec3 norm = normalize(cross(dFdx(input.position), dFdy(input.position)));
+            vec3 lightDir = normalize(lightPos - input.position);
+            vec3 viewDir = normalize(viewPos - input.position);
 
             // Ambient component
-            float3 ambient = ambientColor;
+            vec3 ambient = ambientColor;
 
             // Diffuse component
-            float diff = max(dot(norm, lightDir), 0.0);
-            float3 diffuse = diff * float3(1.0, 1.0, 1.0);  // White diffuse light
+            vec2 diff = max(dot(norm, lightDir), 0.0);
+            vec3 diffuse = diff * vec3(1.0, 1.0, 1.0);  // White diffuse light
 
             // Specular component
-            float3 specular = calculateSpecular(norm, lightDir, viewDir);
+            vec3 specular = calculateSpecular(norm, lightDir, viewDir);
 
             // Combine lighting components
-            float3 lighting = ambient + diffuse + specular;
+            vec3 lighting = ambient + diffuse + specular;
             output.color.rgb = lighting;
             output.color.a = 1.0; // Alpha channel
 
@@ -53,10 +57,10 @@ shader advancedShader {
     }
 
     fragment {
-        float4 main(VSOutput input) @SV_TARGET {
+        vec4 main(VSOutput input) @SV_TARGET {
             // Sample texture and apply lighting
-            float4 texColor = texture(textureSampler, input.color.xy);
-            return float4(input.color.rgb * texColor.rgb, 1.0);
+            vec4 texColor = texture(textureSampler, input.color.xy);
+            return vec4(input.color.rgb * texColor.rgb, 1.0);
         }
     }
 }

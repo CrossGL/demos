@@ -1,17 +1,19 @@
 shader main {
     struct VSInput {
-        float2 texCoord @TEXCOORD0;
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
     };
 
     struct VSOutput {
-        float2 texCoord @TEXCOORD0;
+        vec3 positionOut @POSITION;
+        vec2 texCoord @TEXCOORD0;
     };
 
     struct PSInput {
-        float2 texCoord @TEXCOORD0;
+        vec2 texCoord @TEXCOORD0;
     };
 
-    uniform sampler2D texture;
+    sampler2D texture;
 
     vertex {
         VSOutput main(VSInput input) {
@@ -22,24 +24,24 @@ shader main {
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
-            float2 texCoord = input.texCoord;
-            float2 texOffset = float2(1.0 / 512.0); // Offset to sample neighboring pixels
-            float kernel[9] = {-1.0, -1.0, -1.0, -1.0, 8.0, -1.0, -1.0, -1.0, -1.0};
+        vec4 main(PSInput input) @SV_TARGET {
+            vec2 texCoord = input.texCoord;
+            vec2 texOffset = vec2(1.0 / 512.0); // Offset to sample neighboring pixels
+            vec2 kernel[9] = {-1.0, -1.0, -1.0, -1.0, 8.0, -1.0, -1.0, -1.0, -1.0};
 
-            float3 sample[9];
+            vec3 sample[9];
             for (int i = -1; i <= 1; i++) {
                 for (int j = -1; j <= 1; j++) {
-                    sample[(i + 1) * 3 + (j + 1)] = texture.Sample(texture, texCoord + float2(i, j) * texOffset).rgb;
+                    sample[(i + 1) * 3 + (j + 1)] = texture.Sample(texture, texCoord + vec2(i, j) * texOffset).rgb;
                 }
             }
 
-            float3 color = float3(0.0);
+            vec3 color = vec3(0.0);
             for (int i = 0; i < 9; i++) {
                 color += sample[i] * kernel[i];
             }
 
-            return float4(color, 1.0);
+            return vec4(color, 1.0);
         }
     }
 }

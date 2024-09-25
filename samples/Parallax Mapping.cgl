@@ -1,19 +1,25 @@
 shader main {
     struct VSInput {
-        float2 texCoord @TEXCOORD0;
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
     };
 
     struct VSOutput {
-        float2 texCoordOut @TEXCOORD0;
+        vec3 positionOut @POSITION;
+        vec2 texCoordOut @TEXCOORD0;
     };
 
     struct PSInput {
-        float2 texCoordOut @TEXCOORD0;
+        vec2 texCoordOut @TEXCOORD0;
     };
 
-    uniform sampler2D texture;
-    uniform sampler2D heightMap;
-    uniform float2 viewDir;
+    cbuffer ShaderUniforms { 
+    vec2 viewDir; 
+}
+
+sampler2D texture; 
+sampler2D heightMap; 
+
 
     vertex {
         VSOutput main(VSInput input) {
@@ -24,12 +30,12 @@ shader main {
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
-            float2 texCoordOut = input.texCoordOut;
-            float height = texture.Sample(heightMap, texCoordOut).r;
-            float2 offset = height * viewDir;
-            float4 color = texture.Sample(texture, texCoordOut + offset);
-            return float4(color.rgb, 1.0);
+        vec4 main(PSInput input) @SV_TARGET {
+            vec2 texCoordOut = input.texCoordOut;
+            vec2 height = texture.Sample(heightMap, texCoordOut).r;
+            vec2 offset = height * viewDir;
+            vec4 color = texture.Sample(texture, texCoordOut + offset);
+            return vec4(color.rgb, 1.0);
         }
     }
 }

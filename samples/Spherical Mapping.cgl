@@ -1,17 +1,19 @@
 shader main {
     struct VSInput {
-        float3 position @POSITION;
+        vec3 position @POSITION;
+        vec3 position @POSITION;
     };
 
     struct VSOutput {
-        float3 position @POSITION;
+        vec3 positionOut @POSITION; 
+        vec3 position @POSITION;
     };
 
     struct PSInput {
-        float3 position @POSITION;
+        vec3 position @POSITION;
     };
 
-    uniform sampler2D texture;
+    sampler2D texture;
 
     vertex {
         VSOutput main(VSInput input) {
@@ -22,13 +24,13 @@ shader main {
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
-            float3 norm = normalize(input.position);
-            float u = 0.5 + atan2(norm.z, norm.x) / (2.0 * 3.14159265);
-            float v = 0.5 - asin(norm.y) / 3.14159265;
-            float2 uv = float2(u, v);
-            float4 color = texture.Sample(texture, uv);
-            return float4(color.rgb, 1.0);
+        vec4 main(PSInput input) @SV_TARGET {
+            vec3 norm = normalize(input.position);
+            vec2 u = 0.5 + atan2(norm.z, norm.x) / (2.0 * 3.14159265);
+            vec2 v = 0.5 - asin(norm.y) / 3.14159265;
+            vec2 uv = vec2(u, v);
+            vec4 color = texture.Sample(texture, uv);
+            return vec4(color.rgb, 1.0);
         }
     }
 }

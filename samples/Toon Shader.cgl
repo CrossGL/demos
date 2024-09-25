@@ -5,6 +5,7 @@ shader main {
     };
 
     struct VSOutput {
+        vec3 positionOut @POSITION;
         vec4 color @COLOR; // Output color
     };
 
@@ -12,8 +13,11 @@ shader main {
         vec4 color @COLOR; // Input color for the fragment shader
     };
 
-    uniform vec3 lightPos;
-    uniform vec3 colorLevels;
+    cbuffer ShaderUniforms { 
+    vec3 lightPos; 
+    vec3 colorLevels; 
+}
+
 
     vertex {
         VSOutput main(VSInput input) {
@@ -25,15 +29,15 @@ shader main {
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
+        vec4 main(PSInput input) @SV_TARGET {
             vec3 position = input.color.xyz; // Extract the position
             vec3 normal = input.color.wyz;   // Extract the normal (assuming w holds a component of normal)
 
             vec3 norm = normalize(normal);
             vec3 lightDir = normalize(lightPos - position);
-            float intensity = dot(norm, lightDir);
+            vec2 intensity = dot(norm, lightDir);
             vec3 fragColorValue = vec3(step(colorLevels, intensity));
-            return float4(fragColorValue, 1.0);
+            return vec4(fragColorValue, 1.0);
         }
     }
 }

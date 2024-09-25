@@ -1,38 +1,39 @@
 shader main {
     struct VSInput {
-        float2 texCoord @TEXCOORD0;
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
     };
 
     struct VSOutput {
-        float4 gl_Position @SV_POSITION;
-        float2 fragTexCoord @TEXCOORD0;
+        vec4 gl_Position @SV_POSITION;
+        vec2 fragTexCoord @TEXCOORD0;
     };
 
     struct PSInput {
-        float2 fragTexCoord @TEXCOORD0;
+        vec2 fragTexCoord @TEXCOORD0;
     };
 
     vertex {
         VSOutput main(VSInput input) {
             VSOutput output;
             output.fragTexCoord = input.texCoord;
-            output.gl_Position = float4(0.0, 0.0, 0.0, 1.0); // Placeholder for position
+            output.gl_Position = vec4(0.0, 0.0, 0.0, 1.0); // Placeholder for position
             return output;
         }
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
+        vec4 main(PSInput input) @SV_TARGET {
             sampler2D texture;
             sampler2D displacementMap;
-            float displacementFactor;
-            float4 fragColor;
+            vec2 displacementFactor;
+            vec4 fragColor;
 
-            float2 texCoord = input.fragTexCoord;
-            float2 displacement = tex2D(displacementMap, texCoord).rg * 2.0 - 1.0;
-            float2 uv = texCoord + displacement * displacementFactor;
-            float4 color = tex2D(texture, uv);
-            fragColor = float4(color.rgb, 1.0);
+            vec2 texCoord = input.fragTexCoord;
+            vec2 displacement = tex2D(displacementMap, texCoord).rg * 2.0 - 1.0;
+            vec2 uv = texCoord + displacement * displacementFactor;
+            vec4 color = tex2D(texture, uv);
+            fragColor = vec4(color.rgb, 1.0);
             return fragColor;
         }
     }

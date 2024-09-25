@@ -5,23 +5,27 @@ shader main {
 
     output vec4 fragColor;
 
-    uniform sampler2D texture;
-    uniform float radius;
-    uniform float softness;
+    cbuffer ShaderUniforms { 
+    vec2 radius; 
+    vec2 softness; 
+}
+
+sampler2D texture; 
+
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
+        vec4 main(PSInput input) @SV_TARGET {
             // Sample the texture at the input texture coordinates
             vec4 color = texture(texture, input.texCoord);
             
             // Calculate the distance from the center (0.5, 0.5)
-            float dist = distance(input.texCoord, vec2(0.5));
+            vec2 dist = distance(input.texCoord, vec2(0.5));
             
             // Compute the vignette effect using smoothstep
-            float vignette = smoothstep(radius, radius - softness, dist);
+            vec2 vignette = smoothstep(radius, radius - softness, dist);
             
             // Set the fragment color applying the vignette effect
-            return float4(color.rgb * vignette, 1.0);
+            return vec4(color.rgb * vignette, 1.0);
         }
     }
 }

@@ -1,43 +1,44 @@
 shader main {
     struct VSInput {
-        float2 texCoord @TEXCOORD0;
+        vec3 position @POSITION;
+        vec2 texCoord @TEXCOORD0;
     };
 
     struct VSOutput {
-        float4 gl_Position @SV_POSITION;
-        float2 fragTexCoord @TEXCOORD0;
+        vec4 gl_Position @SV_POSITION;
+        vec2 fragTexCoord @TEXCOORD0;
     };
 
     struct PSInput {
-        float2 fragTexCoord @TEXCOORD0;
+        vec2 fragTexCoord @TEXCOORD0;
     };
 
     vertex {
         VSOutput main(VSInput input) {
             VSOutput output;
             output.fragTexCoord = input.texCoord;
-            output.gl_Position = float4(0.0, 0.0, 0.0, 1.0); // Placeholder for position
+            output.gl_Position = vec4(0.0, 0.0, 0.0, 1.0); // Placeholder for position
             return output;
         }
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
+        vec4 main(PSInput input) @SV_TARGET {
             sampler2D texture;
-            float4 fragColor;
+            vec4 fragColor;
 
-            float2 texCoord = input.fragTexCoord;
-            float2 texOffset = float2(1.0 / 512.0); // Offset for sampling neighboring pixels
-            float3 sample[9];
+            vec2 texCoord = input.fragTexCoord;
+            vec2 texOffset = vec2(1.0 / 512.0); // Offset for sampling neighboring pixels
+            vec3 sample[9];
 
             // Sample the 3x3 neighborhood around the current pixel
             for (int i = -1; i <= 1; i++) {
                 for (int j = -1; j <= 1; j++) {
-                    sample[(i+1) * 3 + (j+1)] = tex2D(texture, texCoord + float2(i, j) * texOffset).rgb;
+                    sample[(i+1) * 3 + (j+1)] = tex2D(texture, texCoord + vec2(i, j) * texOffset).rgb;
                 }
             }
 
-            float3 color = float3(0.0);
+            vec3 color = vec3(0.0);
             // Apply the edge detection kernel
             color += sample[0] * -1.0; // Top-left
             color += sample[1] * -1.0; // Top-center
@@ -49,7 +50,7 @@ shader main {
             color += sample[8] * 1.0;  // Bottom-right
 
             // Add bias to the color to ensure it's visible
-            fragColor = float4(color + float3(0.5), 1.0);
+            fragColor = vec4(color + vec3(0.5), 1.0);
             return fragColor;
         }
     }

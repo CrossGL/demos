@@ -1,26 +1,30 @@
 shader main {
     struct VSInput {
-        float3 position @POSITION;
-        float3 normal @NORMAL;
-        float2 texCoord @TEXCOORD0;
+        vec3 position @POSITION;
+        vec3 normal @NORMAL;
+        vec2 texCoord @TEXCOORD0;
     };
 
     struct VSOutput {
-        float2 texCoord @TEXCOORD0;
-        float3 position @POSITION;
-        float3 normal @NORMAL;
+        vec2 texCoord @TEXCOORD0;
+        vec3 position @POSITION;
+        vec3 normal @NORMAL;
     };
 
     struct PSInput {
-        float2 texCoord @TEXCOORD0;
-        float3 position @POSITION;
-        float3 normal @NORMAL;
+        vec2 texCoord @TEXCOORD0;
+        vec3 position @POSITION;
+        vec3 normal @NORMAL;
     };
 
-    uniform sampler2D texture;
-    uniform sampler2D normalMap;
-    uniform float3 lightPos;
-    uniform float3 viewPos;
+    cbuffer ShaderUniforms { 
+    vec3 lightPos; 
+    vec3 viewPos; 
+}
+
+sampler2D texture; 
+sampler2D normalMap; 
+
 
     vertex {
         VSOutput main(VSInput input) {
@@ -33,24 +37,24 @@ shader main {
     }
 
     fragment {
-        float4 main(PSInput input) @SV_TARGET {
+        vec4 main(PSInput input) @SV_TARGET {
             // Fetch and normalize the normal from the normal map
-            float3 norm = normalize(texture.Sample(normalMap, input.texCoord).rgb * 2.0 - 1.0);
+            vec3 norm = normalize(texture.Sample(normalMap, input.texCoord).rgb * 2.0 - 1.0);
             
             // Compute the light direction and the diffuse component
-            float3 lightDir = normalize(lightPos - input.position);
-            float diff = max(dot(norm, lightDir), 0.0);
+            vec3 lightDir = normalize(lightPos - input.position);
+            vec2 diff = max(dot(norm, lightDir), 0.0);
             
             // Compute the reflection direction and specular component
-            float3 reflectDir = reflect(-lightDir, norm);
-            float3 viewDir = normalize(viewPos - input.position);
-            float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+            vec3 reflectDir = reflect(-lightDir, norm);
+            vec3 viewDir = normalize(viewPos - input.position);
+            vec2 spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
             
             // Fetch the texture color
-            float3 color = texture.Sample(texture, input.texCoord).rgb;
+            vec3 color = texture.Sample(texture, input.texCoord).rgb;
             
             // Compute the final color with ambient, diffuse, and specular components
-            return float4((0.1 + diff + spec) * color, 1.0);
+            return vec4((0.1 + diff + spec) * color, 1.0);
         }
     }
 }
